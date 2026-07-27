@@ -35,17 +35,21 @@
   }
   /* le titre reprend le cadre translucide des boutons */
   h1{
-    display:inline-block;
+    display:block;
+    /* même largeur que le bloc des deux colonnes de boutons */
+    width:100%; max-width:440px; margin:0 auto;
     font-family:"Marcellus",Georgia,serif; font-weight:400;
-    font-size:clamp(1.5rem,4.6vw,2.5rem); line-height:1.2; margin:0;
+    font-size:clamp(1.2rem,4vw,2rem); line-height:1.25;
     letter-spacing:-.005em;
-    padding:.55em 1.1em;
+    padding:.6em .8em;
     background:rgba(255,255,255,.62); backdrop-filter:blur(7px);
     border:1px solid rgba(255,255,255,.72); border-radius:2px;
     color:#000000;
   }
   .filet{width:52px;height:2px;background:#C42B6B;margin:clamp(24px,3.2vw,34px) auto}
-  .langues{display:grid; gap:10px; grid-template-columns:repeat(auto-fit,minmax(152px,1fr))}
+  /* deux boutons par ligne, quelle que soit la largeur d'écran */
+  .langues{display:grid; gap:10px; grid-template-columns:1fr 1fr;
+    max-width:440px; margin:0 auto}
   /* boutons translucides : c'est ici que passe la transparence */
   a{
     display:block; padding:1em .8em;
@@ -71,13 +75,13 @@
     <div class="filet"></div>
     <nav class="langues">
       <a href="fr.html" hreflang="fr">Français</a>
-      <a href="en.html" hreflang="en">English</a>
-      <a href="es.html" hreflang="es">Español</a>
-      <a href="de.html" hreflang="de">Deutsch</a>
       <a href="nl.html" hreflang="nl">Nederlands</a>
+      <a href="en.html" hreflang="en">English</a>
+      <a href="de.html" hreflang="de">Deutsch</a>
+      <a href="es.html" hreflang="es">Español</a>
       <a href="he.html" hreflang="he" class="he">עברית</a>
-      <a href="zh.html" hreflang="zh" class="zh">中文</a>
       <a href="ja.html" hreflang="ja" class="ja">日本語</a>
+      <a href="zh.html" hreflang="zh" class="zh">中文</a>
     </nav>
   </main>
 </body>
