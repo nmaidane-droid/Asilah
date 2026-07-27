@@ -152,6 +152,8 @@ p{margin:0 0 1em} p:last-child{margin-bottom:0}
 
 /* ═══ PILOTAGE ═══ */
 #barre{position:fixed; left:0; bottom:0; height:3px; width:0; background:var(--fuchsia); z-index:30; pointer-events:none}
+#compteur{position:fixed; left:clamp(12px,1.8vw,26px); bottom:clamp(14px,1.8vw,24px); z-index:40;
+  font-size:.7rem; letter-spacing:.2em; color:#fff; mix-blend-mode:difference; opacity:.5; font-variant-numeric:tabular-nums}
 #pilote{position:fixed; right:clamp(12px,1.8vw,26px); bottom:clamp(12px,1.8vw,24px); z-index:40;
   display:flex; align-items:center; gap:5px; background:rgba(20,52,42,.44); backdrop-filter:blur(8px);
   border-radius:999px; padding:5px 7px; opacity:.26; transition:opacity 300ms ease}
@@ -161,8 +163,6 @@ p{margin:0 0 1em} p:last-child{margin-bottom:0}
 #pilote svg{width:15px; height:15px; fill:currentColor}
 #pilote #langue{width:auto; min-width:34px; padding:0 11px; border-radius:999px;
   font-size:.7rem; letter-spacing:.12em; font-weight:400}
-#compteur{position:fixed; left:clamp(12px,1.8vw,26px); bottom:clamp(14px,1.8vw,24px); z-index:40;
-  font-size:.7rem; letter-spacing:.2em; color:#fff; mix-blend-mode:difference; opacity:.5; font-variant-numeric:tabular-nums}
 #sommaire{position:fixed; left:50%; transform:translateX(-50%); bottom:clamp(12px,1.8vw,22px);
   z-index:40; display:flex; gap:4px; opacity:.28; transition:opacity 300ms ease}
 #sommaire:hover, body.bouge #sommaire{opacity:1}
@@ -233,8 +233,15 @@ h1,h2,h3{line-height:1.32; letter-spacing:0}
 .g-photo .legende{left:auto; right:var(--pad)}
 .mosaique .nom{left:auto; right:11px}
 
-/* repères de lecture : compteur à droite, barre qui avance vers la gauche */
-#compteur{left:auto; right:clamp(12px,1.8vw,26px)}
+/* Le compteur : « 01 / 30 » s'inversait en « 30 / 01 ».
+   La barre oblique est un caractère neutre : en contexte de droite à gauche,
+   l'algorithme bidirectionnel la fait basculer avec les nombres.
+   direction:ltr + unicode-bidi:isolate le sortent du flux hébreu.          */
+#compteur{
+  left:auto; right:clamp(12px,1.8vw,26px);
+  direction:ltr; unicode-bidi:isolate;
+}
+/* la barre de progression avance vers la gauche */
 #barre{left:auto; right:0}
 /* la barre de commandes garde l'ordre d'un lecteur vidéo, comme partout ailleurs */
 #pilote{right:auto; left:clamp(12px,1.8vw,26px); direction:ltr}
