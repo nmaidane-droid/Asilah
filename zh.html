@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Asilah &amp; Riad Le Bougainvillier</title>
+<meta name="theme-color" content="#14342A">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23fff'/%3E%3Cpath d='M16 5c5 0 9 4 9 9v13H7V14c0-5 4-9 9-9z' fill='%232F7A55'/%3E%3Ccircle cx='16' cy='17' r='3' fill='%23C42B6B'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --chaux:#FFFFFF; --ombre:#EFF3EF;
+  --vert:#2F7A55; --vert-nuit:#14342A;
+  --fuchsia:#C42B6B; --pierre:#8DA396; --doux:#3D5A4C; --trait:#DBE5DE;
+  --display:"Marcellus", Georgia, serif;
+  --texte:"Jost","Helvetica Neue",Arial,sans-serif;
+  --pad: clamp(26px, 4.2vw, 74px);
+  --bas: calc(46px + env(safe-area-inset-bottom, 0px));
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%; margin:0; overflow:hidden; background:var(--vert-nuit)}
+body{font-family:var(--texte); font-weight:300; color:var(--vert-nuit);
+  -webkit-font-smoothing:antialiased; -webkit-tap-highlight-color:transparent}
+img{display:block; max-width:100%}
+button{font:inherit; color:inherit; border:0; background:none; cursor:pointer}
+:focus-visible{outline:2px solid var(--fuchsia); outline-offset:2px}
+h1,h2,h3{font-family:var(--display); font-weight:400; margin:0; line-height:1.12; letter-spacing:-.005em}
+p{margin:0 0 1em} p:last-child{margin-bottom:0}
+
+#scene{position:fixed; inset:0; background:var(--chaux)}
+.dia{position:absolute; inset:0; opacity:0; visibility:hidden;
+  transition:opacity 900ms ease, visibility 0s linear 900ms; background:var(--chaux); overflow:hidden}
+.dia.actif{opacity:1; visibility:visible; transition:opacity 900ms ease, visibility 0s}
+
+.fond{position:absolute; inset:0; overflow:hidden}
+.fond img{width:100%; height:100%; object-fit:cover}
+.dia.actif .fond img{animation:derive var(--duree,7000ms) linear forwards}
+@keyframes derive{from{transform:scale(1.001)} to{transform:scale(1.06)}}
+
+.voile{position:absolute; inset:0}
+.voile--bas{background:linear-gradient(to top, rgba(20,52,42,.9) 0%, rgba(20,52,42,.4) 36%, rgba(20,52,42,0) 70%)}
+.voile--gauche{background:linear-gradient(100deg, rgba(20,52,42,.9) 0%, rgba(20,52,42,.6) 44%, rgba(20,52,42,.12) 80%)}
+
+.dedans{position:relative; height:100%; padding:var(--pad); display:flex; flex-direction:column; justify-content:center}
+.dedans, .g-moitie .txt, .g-fiche .txt{padding-bottom:calc(var(--pad) + var(--bas))}
+.cadre{width:100%; max-width:1460px; margin:0 auto}
+.clair{color:#fff}
+.clair .eyebrow{color:rgba(255,255,255,.74)}
+
+.eyebrow{font-size:clamp(.6rem,.8vw,.72rem); font-weight:500; letter-spacing:.28em;
+  text-transform:uppercase; color:var(--pierre); margin:0 0 clamp(12px,1.4vw,20px)}
+.titre{font-size:clamp(1.7rem, 3.7vw, 3.4rem)}
+.titre--geant{font-size:clamp(2.2rem, 6vw, 5.4rem); line-height:1.03}
+.sous{font-size:clamp(.9rem,1.1vw,1.05rem); line-height:1.72; max-width:52ch; color:var(--doux)}
+.clair .sous{color:rgba(255,255,255,.92)}
+.filet{width:52px; height:2px; background:var(--fuchsia); margin:clamp(15px,1.7vw,24px) 0}
+
+/* ═══ MOITIÉ : texte + photo ═══ */
+.g-moitie{display:grid; grid-template-columns:1.04fr .96fr; height:100%}
+.g-moitie--inv .ph{order:2}
+.g-moitie .ph{position:relative; overflow:hidden}
+.g-moitie .ph img{width:100%; height:100%; object-fit:cover}
+.dia.actif .g-moitie .ph img{animation:derive var(--duree,7000ms) linear forwards}
+.g-moitie .txt{padding:var(--pad); display:flex; flex-direction:column; justify-content:center; background:var(--chaux)}
+.g-moitie--pale .txt{background:var(--ombre)}
+
+/* ═══ PAGE PHOTO ═══ */
+.g-photo .legende{
+  position:absolute; left:var(--pad); bottom:calc(var(--bas) + 10px); margin:0;
+  display:inline-flex; align-items:center; gap:11px;
+  padding:10px 18px 10px 15px; border-radius:2px;
+  background:rgba(20,52,42,.84); backdrop-filter:blur(10px);
+  font-size:clamp(.7rem,.88vw,.82rem); font-weight:400; letter-spacing:.22em;
+  text-transform:uppercase; color:#fff;
+}
+.g-photo .legende::before{content:""; flex:none; width:6px; height:6px;
+  background:var(--fuchsia); transform:rotate(45deg)}
+
+/* ═══ FICHE ═══ */
+.g-fiche{display:grid; grid-template-columns:.82fr 1.18fr; height:100%}
+.g-fiche .txt{padding:var(--pad); display:flex; flex-direction:column; justify-content:center; background:var(--chaux)}
+.g-fiche--pale .txt{background:var(--ombre)}
+.mosaique{display:grid; gap:4px; background:#fff; height:100%; overflow:hidden}
+.mosaique .ph{position:relative; overflow:hidden; background:var(--ombre)}
+.mosaique .ph img{width:100%; height:100%; object-fit:cover}
+.dia.actif .mosaique .ph:first-child img{animation:derive var(--duree,7000ms) linear forwards}
+.mosaique--1{grid-template-columns:1fr}
+.mosaique--2{grid-template-columns:1fr 1fr}
+.mosaique--3{grid-template-columns:1.18fr 1fr; grid-template-rows:1fr 1fr}
+.mosaique--3 .ph:first-child{grid-row:span 2}
+.mosaique--4{grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr}
+.mosaique .nom{
+  position:absolute; left:11px; bottom:11px; margin:0;
+  padding:6px 12px; border-radius:2px;
+  background:rgba(20,52,42,.82); backdrop-filter:blur(8px);
+  font-size:clamp(.56rem,.68vw,.66rem); letter-spacing:.2em;
+  text-transform:uppercase; color:#fff;
+}
+
+.details{list-style:none; margin:clamp(16px,1.8vw,26px) 0 0; padding:0; display:grid; gap:clamp(5px,.6vw,9px)}
+.details li{position:relative; padding-left:17px; font-size:clamp(.76rem,.92vw,.88rem); line-height:1.5; color:var(--doux)}
+.details li::before{content:""; position:absolute; left:0; top:.52em; width:5px; height:5px; background:var(--fuchsia); transform:rotate(45deg)}
+.credit{margin-top:clamp(13px,1.5vw,20px); font-size:.68rem; letter-spacing:.08em; color:var(--pierre)}
+
+/* ═══ COLONNES ═══ */
+.colonnes{display:grid; gap:clamp(20px,2.5vw,44px); margin-top:clamp(24px,2.8vw,44px)}
+.colonnes--3{grid-template-columns:repeat(3,1fr)}
+.colonnes--4{grid-template-columns:repeat(4,1fr)}
+.col{border-top:1px solid var(--trait); padding-top:clamp(12px,1.4vw,20px)}
+.col h3{font-size:clamp(.98rem,1.3vw,1.2rem); margin-bottom:.45rem}
+.col p{font-size:clamp(.8rem,.98vw,.94rem); line-height:1.65; color:var(--doux)}
+
+/* ═══ FRISE ═══ */
+.frise{display:grid; grid-template-columns:repeat(4,1fr); gap:clamp(18px,2.3vw,40px); margin-top:clamp(24px,2.8vw,44px)}
+.etape{position:relative; padding-top:clamp(26px,2.8vw,42px)}
+.etape::before{content:""; position:absolute; top:0; left:0; right:0; height:1px; background:var(--trait)}
+.etape::after{content:""; position:absolute; top:-4px; left:0; width:9px; height:9px; background:var(--fuchsia); transform:rotate(45deg)}
+.etape .an{display:block; font-family:var(--display); font-size:clamp(.88rem,1.1vw,1.02rem); color:var(--fuchsia); margin-bottom:.28rem}
+.etape h3{font-size:clamp(.94rem,1.22vw,1.12rem); margin-bottom:.38rem}
+.etape p{font-size:clamp(.78rem,.96vw,.91rem); line-height:1.62; color:var(--doux)}
+
+/* ═══ TABLEAU (conseils pratiques) ═══ */
+.tableau{margin-top:clamp(20px,2.4vw,34px)}
+.rang{display:grid; grid-template-columns:30% 1fr; gap:clamp(12px,1.6vw,26px);
+  padding:clamp(11px,1.3vw,17px) 0; border-bottom:1px solid var(--trait)}
+.rang:first-child{border-top:1px solid var(--trait)}
+.rang dt{font-size:clamp(.68rem,.84vw,.78rem); letter-spacing:.16em; text-transform:uppercase; color:var(--vert); margin:0}
+.rang dd{margin:0; font-size:clamp(.8rem,.98vw,.93rem); line-height:1.6; color:var(--doux)}
+
+/* ═══ CHIFFRES ═══ */
+.chiffres{display:flex; flex-wrap:wrap; margin-top:clamp(20px,2.4vw,34px); border-top:1px solid var(--trait)}
+.chiffres div{flex:1 1 100px; padding:clamp(12px,1.4vw,20px) 16px clamp(12px,1.4vw,20px) 0}
+.chiffres b{display:block; font-family:var(--display); font-weight:400;
+  font-size:clamp(1.5rem,2.3vw,2.2rem); line-height:1; color:var(--vert); margin-bottom:.3rem}
+.chiffres span{font-size:clamp(.6rem,.74vw,.7rem); letter-spacing:.17em; text-transform:uppercase; color:var(--pierre)}
+
+/* ═══ LISTE ═══ */
+.liste{columns:2; column-gap:clamp(26px,3.4vw,56px); margin-top:clamp(22px,2.6vw,38px); padding:0; list-style:none}
+.liste li{break-inside:avoid; position:relative; padding:clamp(6px,.8vw,11px) 0 clamp(6px,.8vw,11px) 21px;
+  font-size:clamp(.82rem,1vw,.97rem); border-bottom:1px solid var(--trait)}
+.liste li::before{content:""; position:absolute; left:0; top:calc(50% - 2.5px);
+  width:5px; height:5px; background:var(--fuchsia); transform:rotate(45deg)}
+
+/* ═══ CONTACT ═══ */
+.contact{display:grid; gap:clamp(12px,1.5vw,20px); margin-top:clamp(20px,2.4vw,34px); max-width:540px}
+.contact div{display:grid; gap:.18rem}
+.contact .cle{font-size:clamp(.6rem,.74vw,.7rem); letter-spacing:.2em; text-transform:uppercase; color:rgba(255,255,255,.64)}
+.contact .val{font-size:clamp(.92rem,1.22vw,1.12rem)}
+
+/* ═══ PILOTAGE ═══ */
+#barre{position:fixed; left:0; bottom:0; height:3px; width:0; background:var(--fuchsia); z-index:30; pointer-events:none}
+#pilote{position:fixed; right:clamp(12px,1.8vw,26px); bottom:clamp(12px,1.8vw,24px); z-index:40;
+  display:flex; align-items:center; gap:5px; background:rgba(20,52,42,.44); backdrop-filter:blur(8px);
+  border-radius:999px; padding:5px 7px; opacity:.26; transition:opacity 300ms ease}
+#pilote:hover, #pilote:focus-within, body.bouge #pilote{opacity:1}
+#pilote button{width:34px; height:34px; border-radius:50%; color:#fff; display:grid; place-items:center; transition:background 200ms ease}
+#pilote button:hover{background:rgba(255,255,255,.16)}
+#pilote svg{width:15px; height:15px; fill:currentColor}
+#pilote #langue{width:auto; min-width:34px; padding:0 11px; border-radius:999px;
+  font-size:.7rem; letter-spacing:.12em; font-weight:400}
+#compteur{position:fixed; left:clamp(12px,1.8vw,26px); bottom:clamp(14px,1.8vw,24px); z-index:40;
+  font-size:.7rem; letter-spacing:.2em; color:#fff; mix-blend-mode:difference; opacity:.5; font-variant-numeric:tabular-nums}
+#sommaire{position:fixed; left:50%; transform:translateX(-50%); bottom:clamp(12px,1.8vw,22px);
+  z-index:40; display:flex; gap:4px; opacity:.28; transition:opacity 300ms ease}
+#sommaire:hover, body.bouge #sommaire{opacity:1}
+#sommaire button{width:6px; height:6px; background:rgba(255,255,255,.55); transform:rotate(45deg); border-radius:1px}
+#sommaire button[aria-current="true"]{background:var(--fuchsia); width:9px; height:9px}
+@media (max-width:900px){ #sommaire{display:none} }
+
+/* ═══ PORTRAIT ═══ */
+@media (max-width:860px), (orientation:portrait){
+  :root{--bas: calc(68px + env(safe-area-inset-bottom, 0px))}
+  .g-moitie{grid-template-columns:1fr; grid-template-rows:44% 56%}
+  .g-fiche{grid-template-columns:1fr; grid-template-rows:38% 62%}
+  .g-moitie--inv .ph, .g-fiche .mosaique{order:-1}
+  .g-moitie .ph{order:-1}
+  /* en pile verticale, le texte coule depuis le haut : plus rien n'est rogné */
+  .g-fiche .txt, .g-moitie .txt{display:block; overflow-y:auto; scrollbar-width:none}
+  .g-fiche--photos{grid-template-rows:50% 50%}
+  .g-fiche .txt::-webkit-scrollbar, .g-moitie .txt::-webkit-scrollbar{display:none}
+  .dedans{overflow-y:auto; scrollbar-width:none}
+  .dedans::-webkit-scrollbar{display:none}
+  .colonnes--3, .colonnes--4{grid-template-columns:1fr 1fr}
+  .frise{grid-template-columns:1fr 1fr; gap:14px}
+  .liste{columns:1}
+  .rang{grid-template-columns:1fr; gap:3px}
+  .dedans, .g-fiche .txt, .g-moitie .txt{padding:clamp(20px,5.5vw,38px); padding-bottom:calc(clamp(20px,5.5vw,38px) + var(--bas))}
+  .titre{font-size:clamp(1.35rem,5.6vw,2.1rem)}
+  .titre--geant{font-size:clamp(1.8rem,8.6vw,3rem)}
+  .sous{font-size:clamp(.82rem,3.2vw,.97rem); line-height:1.62}
+}
+@media (max-height:540px) and (orientation:landscape){
+  .colonnes p, .frise p{display:none}
+  .details{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .dia{transition-duration:200ms}
+  .dia.actif .fond img, .dia.actif .g-moitie .ph img, .dia.actif .mosaique .ph:first-child img{animation:none}
+}
+</style>
+
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{ --display:"Noto Serif SC", serif; --texte:"Noto Sans SC", sans-serif; }
+body{font-weight:400}
+h1,h2,h3{line-height:1.35; letter-spacing:0}
+.titre{font-size:clamp(1.55rem,3.3vw,3rem)}
+.titre--geant{font-size:clamp(2rem,5.2vw,4.4rem); line-height:1.25}
+.sous{line-height:1.95; font-weight:300; max-width:36em}
+.eyebrow, .chiffres span, .contact .cle, .rang dt,
+.g-photo .legende, .mosaique .nom, .etape .an{
+  text-transform:none; letter-spacing:.08em; font-weight:500;
+}
+.eyebrow{font-size:clamp(.72rem,.92vw,.85rem)}
+.g-photo .legende{font-size:clamp(.78rem,.96vw,.9rem); letter-spacing:.1em}
+.chiffres b{font-weight:500}
+.details li, .liste li, .col p, .etape p, .rang dd{line-height:1.85}
+#compteur{letter-spacing:.1em}
+</style>
+</head>
+<body>
+
+<div id="scene">
+
+<!-- ══════════ PREMIÈRE PARTIE · ASILAH ══════════ -->
+
+<!-- 01 -->
+<section class="dia" data-duree="12000">
+  <div class="g-moitie g-moitie--inv">
+    <div class="ph"><img data-photo="ville-remparts" alt="临海的阿西拉城墙"></div>
+    <div class="txt">
+      <p class="eyebrow">摩洛哥 · 大西洋海岸</p>
+      <h1 class="titre titre--geant">走进阿西拉</h1>
+      <div class="filet"></div>
+      <p class="sous">阿西拉是摩洛哥大西洋海岸的一颗明珠，邀您展开一段穿越时光与美景的旅程。历史、艺术与文化交融于狭窄的巷道、雄伟的城墙与如画的海岸线之间。愿这座城市独特的气息打动您——在这里，过往与当下相遇，成就一段难忘的体验。</p>
+    </div>
+  </div>
+</section>
+
+<!-- 02 -->
+<section class="dia" data-duree="12000">
+  <div class="dedans">
+    <div class="cadre">
+      <p class="eyebrow">概览</p>
+      <h2 class="titre">地理位置与气候</h2>
+      <div class="colonnes colonnes--3">
+        <div class="col"><h3>地理位置</h3><p>阿西拉位于摩洛哥大西洋海岸，坐落在丹吉尔与拉腊什之间。毗邻直布罗陀海峡的位置为它带来温和的气候，兼具地中海与大西洋的双重影响。</p></div>
+        <div class="col"><h3>气候</h3><p>阿西拉全年气候温和宜人。夏季温暖晴朗，平均气温约 25 °C；冬季温和湿润，平均气温约 15 °C。</p></div>
+        <div class="col"><h3>海滩</h3><p>阿西拉的海滩以细沙与清澈的海水著称。海岸线上分布着众多海湾与小湾，适合游泳、日光浴与各类水上运动。</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 03 -->
+<section class="dia g-photo" data-duree="5000">
+  <div class="fond"><img data-photo="ville-plage" alt="阿西拉的海滩与大海"></div>
+  <p class="legende">海岸线</p>
+</section>
+
+<!-- 04 -->
+<section class="dia" data-duree="13000">
+  <div class="dedans" style="background:var(--ombre)">
+    <div class="cadre">
+      <p class="eyebrow">两千年</p>
+      <h2 class="titre">城市简史</h2>
+      <div class="frise">
+        <div class="etape"><span class="an">古代</span><h3>罗马时期</h3><p>阿西拉由罗马人建立，当时名为「Zilil」，是重要的贸易港口。城防与浴场的遗迹至今仍可见到。</p></div>
+        <div class="etape"><span class="an">中世纪</span><h3>阿尔摩拉维德与阿尔摩哈德王朝</h3><p>这两个王朝修筑了城墙与要塞，护卫城市免受入侵。</p></div>
+        <div class="etape"><span class="an">十六世纪</span><h3>葡萄牙时期</h3><p>葡萄牙人占领阿西拉，修建堡垒，并以此城作为贸易据点。</p></div>
+        <div class="etape"><span class="an">1956 年至今</span><h3>现代</h3><p>摩洛哥独立之后，阿西拉迎来复兴，成为重要的旅游城市，吸引着世界各地的访客。</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 05 -->
+<section class="dia g-photo" data-duree="5000">
+  <div class="fond"><img data-photo="ville-tour" alt="阿西拉的葡萄牙塔楼"></div>
+  <p class="legende">葡萄牙塔楼</p>
+</section>
+
+<!-- 06 -->
+<section class="dia" data-duree="13000">
+  <div class="dedans">
+    <div class="cadre">
+      <p class="eyebrow">手工艺</p>
+      <h2 class="titre">手工艺与文化遗产</h2>
+      <div class="colonnes colonnes--4">
+        <div class="col"><h3>传统手工艺</h3><p>阿西拉以陶器、刺绣、编织与首饰闻名。麦地那老城内散布着工坊与店铺。</p></div>
+        <div class="col"><h3>文化遗产</h3><p>卡斯巴清真寺、当代艺术馆与伊本·赫勒敦图书馆，见证着这座城市深厚的历史。</p></div>
+        <div class="col"><h3>阿西拉艺术节</h3><p>每年七、八月举办的重要文化活动，吸引世界各地的艺术家前来——绘画、雕塑、音乐与舞蹈。</p></div>
+        <div class="col"><h3>美食</h3><p>地中海与摩洛哥风味的交融：鲜鱼、海鲜、时蔬与香料，尽在城中餐馆。</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 07 -->
+<section class="dia g-photo" data-duree="5000">
+  <div class="fond"><img data-photo="ville-souk" alt="麦地那老城的手工艺店铺"></div>
+  <p class="legende">麦地那老城</p>
+</section>
+
+<!-- 08 -->
+<section class="dia" data-duree="12000">
+  <div class="dedans" style="background:var(--ombre)">
+    <div class="cadre">
+      <p class="eyebrow">城防</p>
+      <h2 class="titre">壮丽的城墙与老城门</h2>
+      <div class="colonnes colonnes--3">
+        <div class="col"><h3>城墙</h3><p>建于十六世纪，环抱整座麦地那，可远眺城市与海岸。厚重的墙体诉说着阿西拉的军事过往。</p></div>
+        <div class="col"><h3>城门</h3><p>门上雕饰与阿拉伯纹样精美，是摩尔式建筑的典范。每一道门都有自己的故事与寓意之名。</p></div>
+        <div class="col"><h3>漫步</h3><p>沿着城墙与城门漫步，是走进这座城市历史与独特气息的方式。</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 09 -->
+<section class="dia g-photo" data-duree="5000">
+  <div class="fond"><img data-photo="ville-remparts" alt="临海的阿西拉城墙"></div>
+  <p class="legende">城墙</p>
+</section>
+
+<!-- 10 -->
+<section class="dia" data-duree="13000">
+  <div class="dedans">
+    <div class="cadre">
+      <p class="eyebrow">海边</p>
+      <h2 class="titre">海滩与海岸漫步</h2>
+      <div class="colonnes colonnes--4">
+        <div class="col"><h3>游泳</h3><p>阿西拉的海滩适合游泳与休憩，海水通常平静而洁净。</p></div>
+        <div class="col"><h3>散步</h3><p>沿海岸散步，可饱览海洋、崖壁与沙滩的开阔景致，伴着清新的空气与浪声。</p></div>
+        <div class="col"><h3>水上运动</h3><p>冲浪、帆板与风筝冲浪的理想之地。当地设有教学与器材租赁点。</p></div>
+        <div class="col"><h3>海钓</h3><p>当地渔民提供出海行程，捕获的鲜鱼可在城中餐馆品尝。</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 11 -->
+<section class="dia g-photo" data-duree="5000">
+  <div class="fond"><img data-photo="ville-fresque" alt="环绕彩绘陶片的老城门"></div>
+  <p class="legende">老城的城门</p>
+</section>
+
+<!-- 12 -->
+<section class="dia" data-duree="13000">
+  <div class="dedans" style="background:var(--ombre)">
+    <div class="cadre">
+      <p class="eyebrow">全年</p>
+      <h2 class="titre">节庆与文化活动</h2>
+      <div class="colonnes colonnes--4">
+        <div class="col"><h3>阿西拉艺术节</h3><p>每年七、八月举办的重要文化活动。绘画、雕塑、音乐与舞蹈，由世界各地的艺术家呈现。</p></div>
+        <div class="col"><h3>海洋节</h3><p>每年七月举行，展现阿西拉的海洋文化：游行、音乐会与水上竞技。</p></div>
+        <div class="col"><h3>音乐之夜</h3><p>全年在咖啡馆、餐馆与广场举行。从爵士到弗拉门戈，本地与国际乐队轮番登场。</p></div>
+        <div class="col"><h3>手工艺市集</h3><p>结识手艺人的机会，也能寻得地道的地毯、首饰、陶器与皮件。</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 13 -->
+<section class="dia" data-duree="13000">
+  <div class="g-moitie g-moitie--inv">
+    <div class="ph"><img data-photo="ville-marche" alt="阿西拉老城的市集"></div>
+    <div class="txt">
+      <p class="eyebrow">实用信息</p>
+      <h2 class="titre">让旅程更从容的实用建议</h2>
+      <dl class="tableau">
+        <div class="rang"><dt>住宿</dt><dd>可选择麦地那内的传统里亚德，或海岸边的舒适酒店。</dd></div>
+        <div class="rang"><dt>饮食</dt><dd>炭烤鲜鱼、酥皮派、塔吉锅、海鲜与传统糕点。</dd></div>
+        <div class="rang"><dt>交通</dt><dd>麦地那老城适合步行。出租车与巴士通往城内与周边。</dd></div>
+        <div class="rang"><dt>购物</dt><dd>老城店铺里可以买到手工纪念品、地毯、首饰与当地物产。</dd></div>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ SECONDE PARTIE · LE RIAD ══════════ -->
+
+<!-- 14 -->
+<section class="dia" data-duree="11000">
+  <div class="g-moitie g-moitie--pale">
+    <div class="txt">
+      <p class="eyebrow">阿西拉老城</p>
+      <h2 class="titre titre--geant">Riad Le Bougainvillier</h2>
+      <div class="filet"></div>
+      <p class="sous">这是一座麦地那里的房子，不按房间出租，而是整幢出租。关上门，这里就是您的家：四间卧室、一座带喷泉的庭院、一处屋顶露台，除了您没有别人。</p>
+    </div>
+    <div class="ph"><img data-photo="cour-ciel" alt="庭院上方的三角梅与天空"></div>
+  </div>
+</section>
+
+<!-- 15 · ENTRÉE -->
+<section class="dia" data-duree="10500">
+  <div class="g-fiche">
+    <div class="txt">
+      <p class="eyebrow">入口</p>
+      <h2 class="titre">它不会被偶然遇见。</h2>
+      <div class="filet"></div>
+      <p class="sous">一条步行小巷，一株夹竹桃，一块手绘的釉砖门牌。门一打开，城市的喧嚣戛然而止——这是房子给人的第一个感受：外面的声音消失了。</p>
+      <p class="credit">《送水人》画作 — @Yassink_art</p>
+    </div>
+    <div class="mosaique mosaique--3">
+      <div class="ph"><img data-photo="entree-plaque" alt="釉砖门牌与铆钉木门"></div>
+      <div class="ph"><img data-photo="entree-ruelle" alt="白墙小巷与夹竹桃"></div>
+      <div class="ph"><img data-photo="entree-toile" alt="入口处的送水人画作"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 16 · COUR -->
+<section class="dia" data-duree="11000">
+  <div class="g-fiche g-fiche--pale">
+    <div class="txt">
+      <p class="eyebrow">庭院</p>
+      <h2 class="titre">没有人愿意待在房间里。</h2>
+      <div class="filet"></div>
+      <p class="sous">这里总比别处凉上几度。水声盖过其余的声响，树向着太阳生长，把阳光碎成一片片落在地上。人们在这里喝咖啡、等人，或者什么都不做。</p>
+    </div>
+    <div class="mosaique mosaique--2">
+      <div class="ph"><img data-photo="cour-fontaine" alt="庭院、喷泉与绿色釉砖"></div>
+      <div class="ph"><img data-photo="cour-ciel" alt="从庭院仰望三角梅"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 17 -->
+<section class="dia g-photo" data-duree="6500">
+  <div class="fond"><img data-photo="cour-fontaine" alt="里亚德的庭院"></div>
+  <div class="voile voile--bas"></div>
+  <div class="dedans clair" style="justify-content:flex-end">
+    <h2 class="titre">住上两天，就听不见喷泉了。</h2>
+  </div>
+</section>
+
+<!-- 18 · LES CHAMBRES -->
+<section class="dia" data-duree="9500">
+  <div class="g-fiche g-fiche--photos">
+    <div class="txt">
+      <p class="eyebrow">就寝</p>
+      <h2 class="titre">四间卧室，四间浴室。</h2>
+      <div class="filet"></div>
+      <p class="sous">三间双人房与一间单人房，各配独立浴室。清晨无需排队，夜里不必穿堂而过。您抵达时床铺已经整理妥当。</p>
+      <div class="chiffres">
+        <div><b>3</b><span>双人房</span></div>
+        <div><b>1</b><span>单人房</span></div>
+        <div><b>7</b><span>宾客</span></div>
+      </div>
+    </div>
+    <div class="mosaique mosaique--4">
+      <div class="ph"><img data-photo="rouge-lit" alt="红色卧室" style="object-position:center 62%"><p class="nom">红</p></div>
+      <div class="ph"><img data-photo="bleue-lit" alt="蓝色卧室" style="object-position:center 78%"><p class="nom">蓝</p></div>
+      <div class="ph"><img data-photo="verte-lit" alt="绿色卧室" style="object-position:72% 82%"><p class="nom">绿</p></div>
+      <div class="ph"><img data-photo="single-lit" alt="单人卧室" style="object-position:center 88%"><p class="nom">单人房</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 19 · CHAMBRE ROUGE -->
+<section class="dia" data-duree="10500">
+  <div class="g-fiche g-fiche--pale">
+    <div class="txt">
+      <p class="eyebrow">红色卧室 · 双人</p>
+      <h2 class="titre">最宽敞的一间，也是唯一带起居角的。</h2>
+      <div class="filet"></div>
+      <p class="sous">一侧是床，另一侧是长榻与茶几：整个下午都可以待在房里，不必下楼。当您希望在满屋人中留一处自己的空间，就选这一间。</p>
+    </div>
+    <div class="mosaique mosaique--3">
+      <div class="ph"><img data-photo="rouge-lit" alt="红色卧室高台上的双人床"></div>
+      <div class="ph"><img data-photo="rouge-banquette" alt="红色卧室的酒红长榻"></div>
+      <div class="ph"><img data-photo="rouge-sdb" alt="自卧室望向独立浴室"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 20 · CHAMBRE BLEUE -->
+<section class="dia" data-duree="9500">
+  <div class="g-fiche">
+    <div class="txt">
+      <p class="eyebrow">蓝色卧室 · 双人</p>
+      <h2 class="titre">清晨，彩窗把颜色涂在墙上。</h2>
+      <div class="filet"></div>
+      <p class="sous">光穿过彩色玻璃门，在床上落下斑斓的色块。持续约一小时，随后散去。这是留给早起者的房间。</p>
+    </div>
+    <div class="mosaique mosaique--2">
+      <div class="ph"><img data-photo="bleue-lit" alt="蓝色卧室的双人床"></div>
+      <div class="ph"><img data-photo="bleue-vitrail" alt="蓝色卧室的彩色玻璃门"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 21 · CHAMBRE VERTE -->
+<section class="dia" data-duree="9000">
+  <div class="g-fiche g-fiche--pale">
+    <div class="txt">
+      <p class="eyebrow">绿色卧室 · 双人</p>
+      <h2 class="titre">四间之中最安静的一间。</h2>
+      <div class="filet"></div>
+      <p class="sous">略微避开通行的路线，陈设素净，没有多余的装饰。床两侧各一盏彩色玻璃壁灯，仅此而已。在这里睡得很好。</p>
+    </div>
+    <div class="mosaique mosaique--1">
+      <div class="ph"><img data-photo="verte-lit" alt="绿色卧室的双人床"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 22 · CHAMBRE SIMPLE -->
+<section class="dia" data-duree="9000">
+  <div class="g-fiche">
+    <div class="txt">
+      <p class="eyebrow">单人卧室</p>
+      <h2 class="titre">是一间真正的卧室，不是加床。</h2>
+      <div class="filet"></div>
+      <p class="sous">与其余三间一样，配有独立浴室。没有人需要睡在客厅，第七位客人也不会被亏待。</p>
+    </div>
+    <div class="mosaique mosaique--1">
+      <div class="ph"><img data-photo="single-lit" alt="第四间卧室的单人床"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 23 · SALON -->
+<section class="dia" data-duree="10000">
+  <div class="g-fiche g-fiche--pale">
+    <div class="txt">
+      <p class="eyebrow">客厅</p>
+      <h2 class="titre">留给起风的夜晚。</h2>
+      <div class="filet"></div>
+      <p class="sous">阿西拉临着大西洋：有些夜晚，露台待不住。人们回到这里，放一部电影，全家人聚在长榻上。墙上的画作出自本地艺术家之手。</p>
+      <ul class="details">
+        <li>55 英寸智能电视 — IPTV 与 Netflix</li>
+        <li>Bose 音响</li>
+      </ul>
+    </div>
+    <div class="mosaique mosaique--2">
+      <div class="ph"><img data-photo="salon-ensemble" alt="纵深的客厅、L 形长榻与画作"></div>
+      <div class="ph"><img data-photo="salon-tv" alt="客厅的电视一角"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 24 · CUISINE -->
+<section class="dia" data-duree="9000">
+  <div class="g-fiche">
+    <div class="txt">
+      <p class="eyebrow">厨房与餐厅</p>
+      <h2 class="titre">完全可以不出门吃饭。</h2>
+      <div class="filet"></div>
+      <p class="sous">渔船在上午晚些时候回港；在那里挑好鱼，晚上就在这里下厨。这正是租一整幢房子与订几间客房的差别。</p>
+      <ul class="details">
+        <li>设备齐全的厨房</li>
+        <li>相邻的餐厅</li>
+        <li>洗衣机</li>
+      </ul>
+    </div>
+    <div class="mosaique mosaique--1">
+      <div class="ph"><img data-photo="cuisine" alt="厨房与餐厅"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 25 · TERRASSE -->
+<section class="dia" data-duree="11000">
+  <div class="g-fiche g-fiche--pale">
+    <div class="txt">
+      <p class="eyebrow">屋顶露台</p>
+      <h2 class="titre">最后大家都会上到屋顶。</h2>
+      <div class="filet"></div>
+      <p class="sous">足够宽敞，三个人各做各的事也互不打扰。有顶的一角午后遮阴，入夜亮起灯，西风起时依然待得住。</p>
+    </div>
+    <div class="mosaique mosaique--3">
+      <div class="ph"><img data-photo="terrasse-couvert" alt="暮色中屋顶露台的有顶起居角"></div>
+      <div class="ph"><img data-photo="terrasse-nuit" alt="夜色中的露台与马赛克墙饰"></div>
+      <div class="ph"><img data-photo="terrasse-fauteuil" alt="露台的吊椅"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 26 · TERRASSE, LES MOMENTS -->
+<section class="dia" data-duree="10000">
+  <div class="g-fiche">
+    <div class="txt">
+      <p class="eyebrow">屋顶露台</p>
+      <h2 class="titre">一天从这里开始，也在这里结束。</h2>
+      <div class="filet"></div>
+      <p class="sous">清晨在阳光下吃鸡蛋，柠檬就长在离餐桌一米的地方，光线掠过屋顶时，把托盘端上来。一年里有九个月，这里才是这座房子真正的客厅。</p>
+    </div>
+    <div class="mosaique mosaique--3">
+      <div class="ph"><img data-photo="terrasse-table" alt="露台上的早餐桌"></div>
+      <div class="ph"><img data-photo="terrasse-apero" alt="露台上的餐前小食"></div>
+      <div class="ph"><img data-photo="terrasse-citronnier" alt="露台上的柠檬"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 27 -->
+<section class="dia g-photo" data-duree="6500">
+  <div class="fond"><img data-photo="terrasse-couvert" alt="暮色中的露台起居角"></div>
+  <div class="voile voile--bas"></div>
+  <div class="dedans clair" style="justify-content:flex-end">
+    <h2 class="titre">到了这个时辰，没有人再提议出门。</h2>
+  </div>
+</section>
+
+<!-- 28 · ÉQUIPEMENTS -->
+<section class="dia" data-duree="14000">
+  <div class="dedans" style="background:var(--ombre)">
+    <div class="cadre">
+      <p class="eyebrow">住宿设施</p>
+      <h2 class="titre">拎包即可入住。</h2>
+      <ul class="liste">
+        <li>带喷泉的内庭院</li>
+        <li>4 间卧室，备有床品</li>
+        <li>4 间浴室，备有毛巾</li>
+        <li>所有浴室配暖气</li>
+        <li>客厅配 55 英寸智能电视、IPTV 与 Netflix</li>
+        <li>餐厅</li>
+        <li>Bose 音响</li>
+        <li>超大屋顶露台，设起居角、餐桌与遮阳伞</li>
+        <li>设备齐全的厨房</li>
+        <li>洗衣机</li>
+        <li>光纤 Wi-Fi</li>
+        <li>机场接送 — 每程 40 欧元</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 29 -->
+<section class="dia g-photo" data-duree="6500">
+  <div class="fond"><img data-photo="ville-coucher" alt="阿西拉海滩的日落"></div>
+  <div class="voile voile--bas"></div>
+  <div class="dedans clair" style="justify-content:flex-end">
+    <h2 class="titre">太阳沉入大西洋，距门口只有五分钟。</h2>
+  </div>
+</section>
+
+<!-- 30 · CONTACT -->
+<section class="dia" data-duree="14000">
+  <div class="fond"><img data-photo="entree-plaque" alt="里亚德的釉砖门牌"></div>
+  <div class="voile voile--gauche"></div>
+  <div class="dedans clair" style="justify-content:center">
+    <p class="eyebrow">预订入住</p>
+    <h2 class="titre titre--geant">Riad Le Bougainvillier</h2>
+    <div class="filet"></div>
+    <div class="contact">
+      <div><span class="cle">地址</span><span class="val">20 Rue Jamaa Bin Ayad — 阿西拉老城</span></div>
+      <div><span class="cle">电话与 WhatsApp</span><span class="val">+212 679 32 32 32</span></div>
+      <div><span class="cle">机场接送</span><span class="val">每程 40 欧元，需预约</span></div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<div id="barre"></div>
+<div id="compteur">01 / 30</div>
+<nav id="sommaire" aria-label="跳转到指定页"></nav>
+
+<div id="pilote">
+  <button id="prec" aria-label="上一页"><svg viewBox="0 0 24 24"><path d="M15.4 4.6 8 12l7.4 7.4 1.6-1.6-5.8-5.8 5.8-5.8z"/></svg></button>
+  <button id="pause" aria-label="暂停">
+    <svg id="icoPause" viewBox="0 0 24 24"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg>
+    <svg id="icoLecture" viewBox="0 0 24 24" style="display:none"><path d="M7 4.5 19 12 7 19.5z"/></svg>
+  </button>
+  <button id="suiv" aria-label="下一页"><svg viewBox="0 0 24 24"><path d="M8.6 4.6 16 12l-7.4 7.4L7 17.8l5.8-5.8L7 6.2z"/></svg></button>
+  <button id="langue" aria-label="中文">ZH</button>
+  <button id="plein" aria-label="全屏"><svg viewBox="0 0 24 24"><path d="M4 9V4h5v2H6v3zm11-5h5v5h-2V6h-3zM4 15h2v3h3v2H4zm14 0h2v5h-5v-2h3z"/></svg></button>
+</div>
+
+<script>
+const DOSSIER = "photos/";
+
+(function(){
+  "use strict";
+  const dias = Array.prototype.slice.call(document.querySelectorAll(".dia"));
+  const barre = document.getElementById("barre");
+  const compteur = document.getElementById("compteur");
+  const sommaire = document.getElementById("sommaire");
+  const btnPause = document.getElementById("pause");
+  const icoPause = document.getElementById("icoPause");
+  const icoLect = document.getElementById("icoLecture");
+  const doux = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function cadreVide(libelle){
+    const w=1200,h=900;
+    const svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'">'+
+      '<rect width="100%" height="100%" fill="#EFF3EF"/><g fill="none" stroke="#B2C6B9" stroke-width="2">'+
+      '<rect x="'+(w/2-60)+'" y="'+(h/2-76)+'" width="120" height="92" rx="4"/>'+
+      '<circle cx="'+(w/2-28)+'" cy="'+(h/2-50)+'" r="10"/>'+
+      '<path d="M'+(w/2-57)+' '+(h/2+13)+' l38-38 28 28 21-18 28 28"/></g>'+
+      '<text x="50%" y="'+(h/2+62)+'" text-anchor="middle" font-family="Jost,Helvetica,Arial,sans-serif" '+
+      'font-size="26" letter-spacing="3" fill="#8DA396">'+libelle+'</text></svg>';
+    return "data:image/svg+xml;utf8,"+encodeURIComponent(svg);
+  }
+
+  function preparer(i){
+    const d = dias[(i + dias.length) % dias.length];
+    if(!d || d.dataset.pretes) return;
+    d.dataset.pretes = "1";
+    d.querySelectorAll("[data-photo]").forEach(function(img){
+      img.addEventListener("error", function(){
+        if(img.dataset.remplace) return;
+        img.dataset.remplace = "1";
+        img.src = cadreVide("照片待补");
+      });
+      img.src = DOSSIER + img.dataset.photo + ".webp";
+    });
+  }
+
+  dias.forEach(function(d,i){
+    const b=document.createElement("button");
+    b.type="button"; b.setAttribute("aria-label","第 "+(i+1));
+    b.setAttribute("aria-current", i===0?"true":"false");
+    b.addEventListener("click", function(){ aller(i); });
+    sommaire.appendChild(b);
+  });
+  const points = Array.prototype.slice.call(sommaire.children);
+
+  let index=0, enPause=false, debut=0, restant=0, minuteur=null, anim=null;
+  const duree = (i) => parseInt(dias[i].dataset.duree||"7000",10);
+
+  function peindre(){
+    dias.forEach(function(d,i){ d.classList.toggle("actif", i===index); });
+    dias[index].style.setProperty("--duree", duree(index)+"ms");
+    points.forEach(function(p,i){ p.setAttribute("aria-current", String(i===index)); });
+    compteur.textContent = String(index+1).padStart(2,"0")+" / "+String(dias.length).padStart(2,"0");
+  }
+  function boucle(){
+    cancelAnimationFrame(anim);
+    (function pas(){
+      if(enPause) return;
+      const p = Math.min(1,(performance.now()-debut)/duree(index));
+      barre.style.width=(p*100)+"%";
+      if(p<1) anim=requestAnimationFrame(pas);
+    })();
+  }
+  function lancer(){
+    clearTimeout(minuteur);
+    debut=performance.now(); restant=duree(index);
+    barre.style.width="0%"; boucle();
+    minuteur=setTimeout(suivante, restant);
+  }
+  function aller(i){
+    index=(i+dias.length)%dias.length;
+    preparer(index); preparer(index+1);
+    peindre();
+    if(!enPause) lancer();
+    else { clearTimeout(minuteur); barre.style.width="0%"; restant=duree(index); }
+  }
+  function suivante(){ aller(index+1); }
+  function precedente(){ aller(index-1); }
+  function basculerPause(){
+    enPause=!enPause;
+    icoPause.style.display=enPause?"none":"";
+    icoLect.style.display=enPause?"":"none";
+    btnPause.setAttribute("aria-label", enPause?"继续播放":"暂停");
+    if(enPause){
+      clearTimeout(minuteur); cancelAnimationFrame(anim);
+      restant=Math.max(0,restant-(performance.now()-debut));
+    } else { debut=performance.now(); boucle(); minuteur=setTimeout(suivante,restant); }
+  }
+
+  document.getElementById("suiv").addEventListener("click", suivante);
+  document.getElementById("prec").addEventListener("click", precedente);
+  btnPause.addEventListener("click", basculerPause);
+  document.getElementById("langue").addEventListener("click", function(){ location.href="index.html"; });
+  document.getElementById("plein").addEventListener("click", function(){
+    if(document.fullscreenElement) document.exitFullscreen();
+    else if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
+  });
+  document.addEventListener("keydown", function(e){
+    if(e.key==="ArrowRight"||e.key==="PageDown"){ e.preventDefault(); suivante(); }
+    else if(e.key==="ArrowLeft"||e.key==="PageUp"){ e.preventDefault(); precedente(); }
+    else if(e.key===" "){ e.preventDefault(); basculerPause(); }
+    else if(e.key.toLowerCase()==="f"){
+      if(document.documentElement.requestFullscreen && !document.fullscreenElement)
+        document.documentElement.requestFullscreen();
+    }
+  });
+  let x0=null,y0=null;
+  document.addEventListener("touchstart", function(e){ x0=e.touches[0].clientX; y0=e.touches[0].clientY; }, {passive:true});
+  document.addEventListener("touchend", function(e){
+    if(x0===null) return;
+    const dx=e.changedTouches[0].clientX-x0, dy=e.changedTouches[0].clientY-y0;
+    if(Math.abs(dx)>55 && Math.abs(dx)>Math.abs(dy)){ dx<0?suivante():precedente(); }
+    x0=y0=null;
+  }, {passive:true});
+  let tempo=null;
+  function reveler(){
+    document.body.classList.add("bouge");
+    clearTimeout(tempo);
+    tempo=setTimeout(function(){ document.body.classList.remove("bouge"); },2200);
+  }
+  document.addEventListener("mousemove", reveler, {passive:true});
+  document.addEventListener("touchstart", reveler, {passive:true});
+  document.addEventListener("visibilitychange", function(){ if(document.hidden && !enPause) basculerPause(); });
+
+  preparer(0); preparer(1); preparer(2);
+  window.addEventListener("load", function(){
+    let k = 3;
+    (function suite(){
+      if(k >= dias.length) return;
+      preparer(k++);
+      setTimeout(suite, 220);
+    })();
+  });
+
+  peindre();
+  if(doux) barre.style.display="none";
+  lancer(); reveler();
+})();
+</script>
+</body>
+</html>

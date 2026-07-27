@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Asilah &amp; Riad Le Bougainvillier</title>
+<meta name="theme-color" content="#14342A">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23fff'/%3E%3Cpath d='M16 5c5 0 9 4 9 9v13H7V14c0-5 4-9 9-9z' fill='%232F7A55'/%3E%3Ccircle cx='16' cy='17' r='3' fill='%23C42B6B'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --chaux:#FFFFFF; --ombre:#EFF3EF;
+  --vert:#2F7A55; --vert-nuit:#14342A;
+  --fuchsia:#C42B6B; --pierre:#8DA396; --doux:#3D5A4C; --trait:#DBE5DE;
+  --display:"Marcellus", Georgia, serif;
+  --texte:"Jost","Helvetica Neue",Arial,sans-serif;
+  --pad: clamp(26px, 4.2vw, 74px);
+  --bas: calc(46px + env(safe-area-inset-bottom, 0px));
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%; margin:0; overflow:hidden; background:var(--vert-nuit)}
+body{font-family:var(--texte); font-weight:300; color:var(--vert-nuit);
+  -webkit-font-smoothing:antialiased; -webkit-tap-highlight-color:transparent}
+img{display:block; max-width:100%}
+button{font:inherit; color:inherit; border:0; background:none; cursor:pointer}
+:focus-visible{outline:2px solid var(--fuchsia); outline-offset:2px}
+h1,h2,h3{font-family:var(--display); font-weight:400; margin:0; line-height:1.12; letter-spacing:-.005em}
+p{margin:0 0 1em} p:last-child{margin-bottom:0}
+
+#scene{position:fixed; inset:0; background:var(--chaux)}
+.dia{position:absolute; inset:0; opacity:0; visibility:hidden;
+  transition:opacity 900ms ease, visibility 0s linear 900ms; background:var(--chaux); overflow:hidden}
+.dia.actif{opacity:1; visibility:visible; transition:opacity 900ms ease, visibility 0s}
+
+.fond{position:absolute; inset:0; overflow:hidden}
+.fond img{width:100%; height:100%; object-fit:cover}
+.dia.actif .fond img{animation:derive var(--duree,7000ms) linear forwards}
+@keyframes derive{from{transform:scale(1.001)} to{transform:scale(1.06)}}
+
+.voile{position:absolute; inset:0}
+.voile--bas{background:linear-gradient(to top, rgba(20,52,42,.9) 0%, rgba(20,52,42,.4) 36%, rgba(20,52,42,0) 70%)}
+.voile--gauche{background:linear-gradient(100deg, rgba(20,52,42,.9) 0%, rgba(20,52,42,.6) 44%, rgba(20,52,42,.12) 80%)}
+
+.dedans{position:relative; height:100%; padding:var(--pad); display:flex; flex-direction:column; justify-content:center}
+.dedans, .g-moitie .txt, .g-fiche .txt{padding-bottom:calc(var(--pad) + var(--bas))}
+.cadre{width:100%; max-width:1460px; margin:0 auto}
+.clair{color:#fff}
+.clair .eyebrow{color:rgba(255,255,255,.74)}
+
+.eyebrow{font-size:clamp(.6rem,.8vw,.72rem); font-weight:500; letter-spacing:.28em;
+  text-transform:uppercase; color:var(--pierre); margin:0 0 clamp(12px,1.4vw,20px)}
+.titre{font-size:clamp(1.7rem, 3.7vw, 3.4rem)}
+.titre--geant{font-size:clamp(2.2rem, 6vw, 5.4rem); line-height:1.03}
+.sous{font-size:clamp(.9rem,1.1vw,1.05rem); line-height:1.72; max-width:52ch; color:var(--doux)}
+.clair .sous{color:rgba(255,255,255,.92)}
+.filet{width:52px; height:2px; background:var(--fuchsia); margin:clamp(15px,1.7vw,24px) 0}
+
+/* ═══ MOITIÉ : texte + photo ═══ */
+.g-moitie{display:grid; grid-template-columns:1.04fr .96fr; height:100%}
+.g-moitie--inv .ph{order:2}
+.g-moitie .ph{position:relative; overflow:hidden}
+.g-moitie .ph img{width:100%; height:100%; object-fit:cover}
+.dia.actif .g-moitie .ph img{animation:derive var(--duree,7000ms) linear forwards}
+.g-moitie .txt{padding:var(--pad); display:flex; flex-direction:column; justify-content:center; background:var(--chaux)}
+.g-moitie--pale .txt{background:var(--ombre)}
+
+/* ═══ PAGE PHOTO ═══ */
+.g-photo .legende{
+  position:absolute; left:var(--pad); bottom:calc(var(--bas) + 10px); margin:0;
+  display:inline-flex; align-items:center; gap:11px;
+  padding:10px 18px 10px 15px; border-radius:2px;
+  background:rgba(20,52,42,.84); backdrop-filter:blur(10px);
+  font-size:clamp(.7rem,.88vw,.82rem); font-weight:400; letter-spacing:.22em;
+  text-transform:uppercase; color:#fff;
+}
+.g-photo .legende::before{content:""; flex:none; width:6px; height:6px;
+  background:var(--fuchsia); transform:rotate(45deg)}
+
+/* ═══ FICHE ═══ */
+.g-fiche{display:grid; grid-template-columns:.82fr 1.18fr; height:100%}
+.g-fiche .txt{padding:var(--pad); display:flex; flex-direction:column; justify-content:center; background:var(--chaux)}
+.g-fiche--pale .txt{background:var(--ombre)}
+.mosaique{display:grid; gap:4px; background:#fff; height:100%; overflow:hidden}
+.mosaique .ph{position:relative; overflow:hidden; background:var(--ombre)}
+.mosaique .ph img{width:100%; height:100%; object-fit:cover}
+.dia.actif .mosaique .ph:first-child img{animation:derive var(--duree,7000ms) linear forwards}
+.mosaique--1{grid-template-columns:1fr}
+.mosaique--2{grid-template-columns:1fr 1fr}
+.mosaique--3{grid-template-columns:1.18fr 1fr; grid-template-rows:1fr 1fr}
+.mosaique--3 .ph:first-child{grid-row:span 2}
+.mosaique--4{grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr}
+.mosaique .nom{
+  position:absolute; left:11px; bottom:11px; margin:0;
+  padding:6px 12px; border-radius:2px;
+  background:rgba(20,52,42,.82); backdrop-filter:blur(8px);
+  font-size:clamp(.56rem,.68vw,.66rem); letter-spacing:.2em;
+  text-transform:uppercase; color:#fff;
+}
+
+.details{list-style:none; margin:clamp(16px,1.8vw,26px) 0 0; padding:0; display:grid; gap:clamp(5px,.6vw,9px)}
+.details li{position:relative; padding-left:17px; font-size:clamp(.76rem,.92vw,.88rem); line-height:1.5; color:var(--doux)}
+.details li::before{content:""; position:absolute; left:0; top:.52em; width:5px; height:5px; background:var(--fuchsia); transform:rotate(45deg)}
+.credit{margin-top:clamp(13px,1.5vw,20px); font-size:.68rem; letter-spacing:.08em; color:var(--pierre)}
+
+/* ═══ COLONNES ═══ */
+.colonnes{display:grid; gap:clamp(20px,2.5vw,44px); margin-top:clamp(24px,2.8vw,44px)}
+.colonnes--3{grid-template-columns:repeat(3,1fr)}
+.colonnes--4{grid-template-columns:repeat(4,1fr)}
+.col{border-top:1px solid var(--trait); padding-top:clamp(12px,1.4vw,20px)}
+.col h3{font-size:clamp(.98rem,1.3vw,1.2rem); margin-bottom:.45rem}
+.col p{font-size:clamp(.8rem,.98vw,.94rem); line-height:1.65; color:var(--doux)}
+
+/* ═══ FRISE ═══ */
+.frise{display:grid; grid-template-columns:repeat(4,1fr); gap:clamp(18px,2.3vw,40px); margin-top:clamp(24px,2.8vw,44px)}
+.etape{position:relative; padding-top:clamp(26px,2.8vw,42px)}
+.etape::before{content:""; position:absolute; top:0; left:0; right:0; height:1px; background:var(--trait)}
+.etape::after{content:""; position:absolute; top:-4px; left:0; width:9px; height:9px; background:var(--fuchsia); transform:rotate(45deg)}
+.etape .an{display:block; font-family:var(--display); font-size:clamp(.88rem,1.1vw,1.02rem); color:var(--fuchsia); margin-bottom:.28rem}
+.etape h3{font-size:clamp(.94rem,1.22vw,1.12rem); margin-bottom:.38rem}
+.etape p{font-size:clamp(.78rem,.96vw,.91rem); line-height:1.62; color:var(--doux)}
+
+/* ═══ TABLEAU (conseils pratiques) ═══ */
+.tableau{margin-top:clamp(20px,2.4vw,34px)}
+.rang{display:grid; grid-template-columns:30% 1fr; gap:clamp(12px,1.6vw,26px);
+  padding:clamp(11px,1.3vw,17px) 0; border-bottom:1px solid var(--trait)}
+.rang:first-child{border-top:1px solid var(--trait)}
+.rang dt{font-size:clamp(.68rem,.84vw,.78rem); letter-spacing:.16em; text-transform:uppercase; color:var(--vert); margin:0}
+.rang dd{margin:0; font-size:clamp(.8rem,.98vw,.93rem); line-height:1.6; color:var(--doux)}
+
+/* ═══ CHIFFRES ═══ */
+.chiffres{display:flex; flex-wrap:wrap; margin-top:clamp(20px,2.4vw,34px); border-top:1px solid var(--trait)}
+.chiffres div{flex:1 1 100px; padding:clamp(12px,1.4vw,20px) 16px clamp(12px,1.4vw,20px) 0}
+.chiffres b{display:block; font-family:var(--display); font-weight:400;
+  font-size:clamp(1.5rem,2.3vw,2.2rem); line-height:1; color:var(--vert); margin-bottom:.3rem}
+.chiffres span{font-size:clamp(.6rem,.74vw,.7rem); letter-spacing:.17em; text-transform:uppercase; color:var(--pierre)}
+
+/* ═══ LISTE ═══ */
+.liste{columns:2; column-gap:clamp(26px,3.4vw,56px); margin-top:clamp(22px,2.6vw,38px); padding:0; list-style:none}
+.liste li{break-inside:avoid; position:relative; padding:clamp(6px,.8vw,11px) 0 clamp(6px,.8vw,11px) 21px;
+  font-size:clamp(.82rem,1vw,.97rem); border-bottom:1px solid var(--trait)}
+.liste li::before{content:""; position:absolute; left:0; top:calc(50% - 2.5px);
+  width:5px; height:5px; background:var(--fuchsia); transform:rotate(45deg)}
+
+/* ═══ CONTACT ═══ */
+.contact{display:grid; gap:clamp(12px,1.5vw,20px); margin-top:clamp(20px,2.4vw,34px); max-width:540px}
+.contact div{display:grid; gap:.18rem}
+.contact .cle{font-size:clamp(.6rem,.74vw,.7rem); letter-spacing:.2em; text-transform:uppercase; color:rgba(255,255,255,.64)}
+.contact .val{font-size:clamp(.92rem,1.22vw,1.12rem)}
+
+/* ═══ PILOTAGE ═══ */
+#barre{position:fixed; left:0; bottom:0; height:3px; width:0; background:var(--fuchsia); z-index:30; pointer-events:none}
+#pilote{position:fixed; right:clamp(12px,1.8vw,26px); bottom:clamp(12px,1.8vw,24px); z-index:40;
+  display:flex; align-items:center; gap:5px; background:rgba(20,52,42,.44); backdrop-filter:blur(8px);
+  border-radius:999px; padding:5px 7px; opacity:.26; transition:opacity 300ms ease}
+#pilote:hover, #pilote:focus-within, body.bouge #pilote{opacity:1}
+#pilote button{width:34px; height:34px; border-radius:50%; color:#fff; display:grid; place-items:center; transition:background 200ms ease}
+#pilote button:hover{background:rgba(255,255,255,.16)}
+#pilote svg{width:15px; height:15px; fill:currentColor}
+#pilote #langue{width:auto; min-width:34px; padding:0 11px; border-radius:999px;
+  font-size:.7rem; letter-spacing:.12em; font-weight:400}
+#compteur{position:fixed; left:clamp(12px,1.8vw,26px); bottom:clamp(14px,1.8vw,24px); z-index:40;
+  font-size:.7rem; letter-spacing:.2em; color:#fff; mix-blend-mode:difference; opacity:.5; font-variant-numeric:tabular-nums}
+#sommaire{position:fixed; left:50%; transform:translateX(-50%); bottom:clamp(12px,1.8vw,22px);
+  z-index:40; display:flex; gap:4px; opacity:.28; transition:opacity 300ms ease}
+#sommaire:hover, body.bouge #sommaire{opacity:1}
+#sommaire button{width:6px; height:6px; background:rgba(255,255,255,.55); transform:rotate(45deg); border-radius:1px}
+#sommaire button[aria-current="true"]{background:var(--fuchsia); width:9px; height:9px}
+@media (max-width:900px){ #sommaire{display:none} }
+
+/* ═══ PORTRAIT ═══ */
+@media (max-width:860px), (orientation:portrait){
+  :root{--bas: calc(68px + env(safe-area-inset-bottom, 0px))}
+  .g-moitie{grid-template-columns:1fr; grid-template-rows:44% 56%}
+  .g-fiche{grid-template-columns:1fr; grid-template-rows:38% 62%}
+  .g-moitie--inv .ph, .g-fiche .mosaique{order:-1}
+  .g-moitie .ph{order:-1}
+  /* en pile verticale, le texte coule depuis le haut : plus rien n'est rogné */
+  .g-fiche .txt, .g-moitie .txt{display:block; overflow-y:auto; scrollbar-width:none}
+  .g-fiche--photos{grid-template-rows:50% 50%}
+  .g-fiche .txt::-webkit-scrollbar, .g-moitie .txt::-webkit-scrollbar{display:none}
+  .dedans{overflow-y:auto; scrollbar-width:none}
+  .dedans::-webkit-scrollbar{display:none}
+  .colonnes--3, .colonnes--4{grid-template-columns:1fr 1fr}
+  .frise{grid-template-columns:1fr 1fr; gap:14px}
+  .liste{columns:1}
+  .rang{grid-template-columns:1fr; gap:3px}
+  .dedans, .g-fiche .txt, .g-moitie .txt{padding:clamp(20px,5.5vw,38px); padding-bottom:calc(clamp(20px,5.5vw,38px) + var(--bas))}
+  .titre{font-size:clamp(1.35rem,5.6vw,2.1rem)}
+  .titre--geant{font-size:clamp(1.8rem,8.6vw,3rem)}
+  .sous{font-size:clamp(.82rem,3.2vw,.97rem); line-height:1.62}
+}
+@media (max-height:540px) and (orientation:landscape){
+  .colonnes p, .frise p{display:none}
+  .details{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .dia{transition-duration:200ms}
+  .dia.actif .fond img, .dia.actif .g-moitie .ph img, .dia.actif .mosaique .ph:first-child img{animation:none}
+}
+</style>
+</head>
+<body>
+
+<div id="scene">
+
+<!-- ══════════ PREMIÈRE PARTIE · ASILAH ══════════ -->
+
+<!-- 01 -->
+<section class="dia" data-duree="12000">
+  <div class="g-moitie g-moitie--inv">
+    <div class="ph"><img data-photo="ville-remparts" alt="Die Stadtmauern von Asilah über dem Ozean"></div>
+    <div class="txt">
+      <p class="eyebrow">Marokko · Atlantikküste</p>
+      <h1 class="titre titre--geant">Asilah entdecken</h1>
+      <div class="filet"></div>
+      <p class="sous">Asilah, Juwel der marokkanischen Atlantikküste, lädt zu einer Reise durch Zeit und Schönheit ein. Geschichte, Kunst und Kultur begegnen sich in den engen Gassen, den mächtigen Mauern und der malerischen Küste. Lassen Sie sich von der besonderen Atmosphäre Asilahs einnehmen, wo Vergangenheit und Gegenwart zu einem unvergesslichen Erlebnis verschmelzen.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 02 -->
+<section class="dia" data-duree="12000">
+  <div class="dedans">
+    <div class="cadre">
+      <p class="eyebrow">Auf einen Blick</p>
+      <h2 class="titre">Lage und Klima</h2>
+      <div class="colonnes colonnes--3">
+        <div class="col"><h3>Lage</h3><p>Asilah liegt an der marokkanischen Atlantikküste, zwischen Tanger und Larache. Die Nähe zur Straße von Gibraltar beschert der Stadt ein gemäßigtes Klima, geprägt von mediterranen wie atlantischen Einflüssen.</p></div>
+        <div class="col"><h3>Klima</h3><p>Das Klima ist ganzjährig mild und angenehm. Die Sommer sind warm und sonnig, im Mittel um 25 °C. Die Winter sind mild und feucht, im Mittel um 15 °C.</p></div>
+        <div class="col"><h3>Strand</h3><p>Die Strände von Asilah sind für ihren feinen Sand und ihr klares Wasser bekannt. Die Küste bietet zahlreiche Buchten, ideal zum Baden, Sonnen und für Wassersport.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 03 -->
+<section class="dia g-photo" data-duree="5000">
+  <div class="fond"><img data-photo="ville-plage" alt="Der Strand und das Meer bei Asilah"></div>
+  <p class="legende">Die Küste</p>
+</section>
+
+<!-- 04 -->
+<section class="dia" data-duree="13000">
+  <div class="dedans" style="background:var(--ombre)">
+    <div class="cadre">
+      <p class="eyebrow">Zwanzig Jahrhunderte</p>
+      <h2 class="titre">Ein Blick in die Stadtgeschichte</h2>
+      <div class="frise">
+        <div class="etape"><span class="an">Antike</span><h3>Die römische Zeit</h3><p>Von den Römern unter dem Namen „Zilil“ gegründet, war Asilah ein bedeutender Handelshafen. Reste von Befestigungen und Thermen sind bis heute zu sehen.</p></div>
+        <div class="etape"><span class="an">Mittelalter</span><h3>Almoraviden und Almohaden</h3><p>Diese Dynastien errichteten die Mauern und Befestigungen, die die Stadt vor Angreifern schützten.</p></div>
+        <div class="etape"><span class="an">16. Jahrhundert</span><h3>Die portugiesische Zeit</h3><p>Die Portugiesen nehmen Asilah ein. Sie bauen ein Fort und nutzen die Stadt als Stützpunkt für ihren Handel.</p></div>
+        <div class="etape"><span class="an">Seit 1956</span><h3>Die Gegenwart</h3><p>Nach der Unabhängigkeit Marokkos erlebt Asilah einen Aufschwung und wird zu einem wichtigen Reiseziel, das Besucher aus aller Welt anzieht.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 05 -->
+<section class="dia g-photo" data-duree="5000">
+  <div class="fond"><img data-photo="ville-tour" alt="Der portugiesische Turm von Asilah"></div>
+  <p class="legende">Der portugiesische Turm</p>
+</section>
+
+<!-- 06 -->
+<section class="dia" data-duree="13000">
+  <div class="dedans">
+    <div class="cadre">
+      <p class="eyebrow">Handwerk</p>
+      <h2 class="titre">Handwerk und Kulturerbe</h2>
+      <div class="colonnes colonnes--4">
+        <div class="col"><h3>Traditionelles Handwerk</h3><p>Asilah ist bekannt für Keramik, Stickerei, Flechtarbeiten und Schmuck. Werkstätten und Läden finden sich überall in der Medina.</p></div>
+        <div class="col"><h3>Kulturerbe</h3><p>Die Kasbah-Moschee, das Museum für zeitgenössische Kunst und die Ibn-Chaldun-Bibliothek zeugen von der reichen Geschichte der Stadt.</p></div>
+        <div class="col"><h3>Das Festival von Asilah</h3><p>Ein großes Kulturereignis, jedes Jahr im Juli und August. Es zieht Künstler aus aller Welt an — Malerei, Bildhauerei, Musik und Tanz.</p></div>
+        <div class="col"><h3>Küche</h3><p>Eine Verbindung mediterraner und marokkanischer Aromen: frischer Fisch, Meeresfrüchte, Gemüse und Gewürze in den Restaurants der Stadt.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 07 -->
+<section class="dia g-photo" data-duree="5000">
+  <div class="fond"><img data-photo="ville-souk" alt="Handwerksläden in der Medina von Asilah"></div>
+  <p class="legende">Die Medina</p>
+</section>
+
+<!-- 08 -->
+<section class="dia" data-duree="12000">
+  <div class="dedans" style="background:var(--ombre)">
+    <div class="cadre">
+      <p class="eyebrow">Befestigungen</p>
+      <h2 class="titre">Die Mauern und Tore der Medina</h2>
+      <div class="colonnes colonnes--3">
+        <div class="col"><h3>Die Stadtmauern</h3><p>Im 16. Jahrhundert errichtet, umschließen sie die Medina und geben einen weiten Blick über Stadt und Küste frei. Die mächtigen Mauern erzählen von Asilahs Vergangenheit als Festung.</p></div>
+        <div class="col"><h3>Die Tore</h3><p>Mit Schnitzwerk und Arabesken verziert, sind sie schöne Beispiele maurischer Baukunst. Jedes Tor hat seine eigene Geschichte und einen sinnbildlichen Namen.</p></div>
+        <div class="col"><h3>Spaziergänge</h3><p>Ein Gang entlang der Mauern und Tore führt mitten hinein in die Geschichte und die besondere Atmosphäre der Stadt.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 09 -->
+<section class="dia g-photo" data-duree="5000">
+  <div class="fond"><img data-photo="ville-remparts" alt="Die Stadtmauern von Asilah über dem Ozean"></div>
+  <p class="legende">Die Stadtmauern</p>
+</section>
+
+<!-- 10 -->
+<section class="dia" data-duree="13000">
+  <div class="dedans">
+    <div class="cadre">
+      <p class="eyebrow">Am Wasser</p>
+      <h2 class="titre">Strände und Spaziergänge an der Küste</h2>
+      <div class="colonnes colonnes--4">
+        <div class="col"><h3>Baden</h3><p>Die Strände von Asilah eignen sich bestens zum Baden und Ausruhen. Das Wasser ist meist ruhig und sauber.</p></div>
+        <div class="col"><h3>Spazieren</h3><p>Ein Spaziergang an der Küste öffnet weite Blicke auf den Ozean, die Klippen und die Strände — bei frischer Luft und dem Rauschen der Wellen.</p></div>
+        <div class="col"><h3>Wassersport</h3><p>Ideale Bedingungen zum Surfen, Windsurfen und Kitesurfen. Schulen und Verleihstationen gibt es vor Ort.</p></div>
+        <div class="col"><h3>Angeln</h3><p>Die örtlichen Fischer bieten Ausfahrten aufs Meer an. Der frische Fang lässt sich anschließend in den Restaurants der Stadt genießen.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 11 -->
+<section class="dia g-photo" data-duree="5000">
+  <div class="fond"><img data-photo="ville-fresque" alt="Ein Tor der Medina, umgeben von bemalter Keramik"></div>
+  <p class="legende">Die Tore der Medina</p>
+</section>
+
+<!-- 12 -->
+<section class="dia" data-duree="13000">
+  <div class="dedans" style="background:var(--ombre)">
+    <div class="cadre">
+      <p class="eyebrow">Das ganze Jahr</p>
+      <h2 class="titre">Feste und Kulturveranstaltungen</h2>
+      <div class="colonnes colonnes--4">
+        <div class="col"><h3>Das Festival von Asilah</h3><p>Ein großes Kulturereignis, jedes Jahr im Juli und August. Malerei, Bildhauerei, Musik und Tanz, von Künstlern aus aller Welt.</p></div>
+        <div class="col"><h3>Das Meeresfest</h3><p>Jedes Jahr im Juli gefeiert, würdigt es die maritime Kultur Asilahs: Umzüge, Konzerte und Regatten.</p></div>
+        <div class="col"><h3>Musikabende</h3><p>Das ganze Jahr über in Cafés, Restaurants und auf den Plätzen. Einheimische und internationale Gruppen, von Jazz bis Flamenco.</p></div>
+        <div class="col"><h3>Handwerksmärkte</h3><p>Die Gelegenheit, den Handwerkern zu begegnen und echte Teppiche, Schmuck, Keramik und Lederwaren zu finden.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 13 -->
+<section class="dia" data-duree="13000">
+  <div class="g-moitie g-moitie--inv">
+    <div class="ph"><img data-photo="ville-marche" alt="Der Markt in der Medina von Asilah"></div>
+    <div class="txt">
+      <p class="eyebrow">Vor Ort</p>
+      <h2 class="titre">Praktische Hinweise für den Aufenthalt</h2>
+      <dl class="tableau">
+        <div class="rang"><dt>Unterkunft</dt><dd>Wählen Sie ein traditionelles Riad oder ein komfortables Hotel, in der Medina oder an der Küste.</dd></div>
+        <div class="rang"><dt>Essen</dt><dd>Frisch gegrillter Fisch, Pastilla, Tajine, Meeresfrüchte und traditionelles Gebäck.</dd></div>
+        <div class="rang"><dt>Unterwegs</dt><dd>Die Medina lässt sich zu Fuß erkunden. Taxis und Busse verbinden die Stadt mit dem Umland.</dd></div>
+        <div class="rang"><dt>Einkaufen</dt><dd>Handgefertigte Mitbringsel, Teppiche, Schmuck und regionale Erzeugnisse in den Läden der Medina.</dd></div>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ SECONDE PARTIE · LE RIAD ══════════ -->
+
+<!-- 14 -->
+<section class="dia" data-duree="11000">
+  <div class="g-moitie g-moitie--pale">
+    <div class="txt">
+      <p class="eyebrow">Altstadt von Asilah</p>
+      <h2 class="titre titre--geant">Riad Le Bougainvillier</h2>
+      <div class="filet"></div>
+      <p class="sous">Ein Haus in der Medina, das nicht zimmerweise vermietet wird, sondern im Ganzen. Sie schließen die Tür hinter sich und sind zu Hause: vier Schlafzimmer, ein Innenhof mit Brunnen, eine Dachterrasse — und niemand außer Ihnen.</p>
+    </div>
+    <div class="ph"><img data-photo="cour-ciel" alt="Die Bougainvillea und der Himmel über dem Innenhof"></div>
+  </div>
+</section>
+
+<!-- 15 · ENTRÉE -->
+<section class="dia" data-duree="10500">
+  <div class="g-fiche">
+    <div class="txt">
+      <p class="eyebrow">Der Eingang</p>
+      <h2 class="titre">Man stößt nicht zufällig darauf.</h2>
+      <div class="filet"></div>
+      <p class="sous">Eine Fußgängergasse, ein Oleander, ein handbemaltes Zellige-Schild. Dann öffnet sich die Tür und die Stadt hört schlagartig auf — das ist das Erste, was dieses Haus mit einem macht: man hört das Draußen nicht mehr.</p>
+      <p class="credit">Gemälde des Guerrab — @Yassink_art</p>
+    </div>
+    <div class="mosaique mosaique--3">
+      <div class="ph"><img data-photo="entree-plaque" alt="Das Zellige-Schild Le Bougainvillier und die genagelte Tür"></div>
+      <div class="ph"><img data-photo="entree-ruelle" alt="Die weiße Gasse und ihr Oleander"></div>
+      <div class="ph"><img data-photo="entree-toile" alt="Gemälde des Wasserträgers am Eingang"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 16 · COUR -->
+<section class="dia" data-duree="11000">
+  <div class="g-fiche g-fiche--pale">
+    <div class="txt">
+      <p class="eyebrow">Der Innenhof</p>
+      <h2 class="titre">Niemand bleibt auf seinem Zimmer.</h2>
+      <div class="filet"></div>
+      <p class="sous">Hier ist es immer ein paar Grad kühler als sonst im Haus. Das Wasser deckt alles Übrige zu, der Baum wächst der Sonne entgegen und lässt sie in Stücken auf den Boden fallen. Hier trinkt man Kaffee, wartet auf die anderen, tut nichts.</p>
+    </div>
+    <div class="mosaique mosaique--2">
+      <div class="ph"><img data-photo="cour-fontaine" alt="Der Innenhof, sein Brunnen und das grüne Zellige"></div>
+      <div class="ph"><img data-photo="cour-ciel" alt="Die Bougainvillea vom Innenhof aus gesehen"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 17 -->
+<section class="dia g-photo" data-duree="6500">
+  <div class="fond"><img data-photo="cour-fontaine" alt="Der Innenhof des Riads"></div>
+  <div class="voile voile--bas"></div>
+  <div class="dedans clair" style="justify-content:flex-end">
+    <h2 class="titre">Nach zwei Tagen hört man den Brunnen nicht mehr.</h2>
+  </div>
+</section>
+
+<!-- 18 · LES CHAMBRES -->
+<section class="dia" data-duree="9500">
+  <div class="g-fiche g-fiche--photos">
+    <div class="txt">
+      <p class="eyebrow">Schlafen</p>
+      <h2 class="titre">Vier Schlafzimmer, vier Bäder.</h2>
+      <div class="filet"></div>
+      <p class="sous">Drei Doppelzimmer und ein Einzelzimmer, jedes mit eigenem Bad. Morgens steht niemand an, nachts muss niemand durchs Haus. Die Betten sind bei Ihrer Ankunft bezogen.</p>
+      <div class="chiffres">
+        <div><b>3</b><span>Doppelzimmer</span></div>
+        <div><b>1</b><span>Einzelzimmer</span></div>
+        <div><b>7</b><span>Gäste</span></div>
+      </div>
+    </div>
+    <div class="mosaique mosaique--4">
+      <div class="ph"><img data-photo="rouge-lit" alt="Das rote Zimmer" style="object-position:center 62%"><p class="nom">Rot</p></div>
+      <div class="ph"><img data-photo="bleue-lit" alt="Das blaue Zimmer" style="object-position:center 78%"><p class="nom">Blau</p></div>
+      <div class="ph"><img data-photo="verte-lit" alt="Das grüne Zimmer" style="object-position:72% 82%"><p class="nom">Grün</p></div>
+      <div class="ph"><img data-photo="single-lit" alt="Das Einzelzimmer" style="object-position:center 88%"><p class="nom">Einzelzimmer</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 19 · CHAMBRE ROUGE -->
+<section class="dia" data-duree="10500">
+  <div class="g-fiche g-fiche--pale">
+    <div class="txt">
+      <p class="eyebrow">Rotes Zimmer · Doppel</p>
+      <h2 class="titre">Das größte — und das einzige mit eigener Sitzecke.</h2>
+      <div class="filet"></div>
+      <p class="sous">Auf der einen Seite das Bett, auf der anderen die Bank mit Tisch: Man kann den Nachmittag hier verbringen, ohne hinunterzugehen. Das Zimmer für alle, die sich in einem vollen Haus einen eigenen Raum bewahren wollen.</p>
+    </div>
+    <div class="mosaique mosaique--3">
+      <div class="ph"><img data-photo="rouge-lit" alt="Das Doppelbett des roten Zimmers auf seinem Podest"></div>
+      <div class="ph"><img data-photo="rouge-banquette" alt="Die weinrote marokkanische Bank des roten Zimmers"></div>
+      <div class="ph"><img data-photo="rouge-sdb" alt="Das eigene Bad, vom Zimmer aus gesehen"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 20 · CHAMBRE BLEUE -->
+<section class="dia" data-duree="9500">
+  <div class="g-fiche">
+    <div class="txt">
+      <p class="eyebrow">Blaues Zimmer · Doppel</p>
+      <h2 class="titre">Morgens malen die Buntglasfenster die Wand an.</h2>
+      <div class="filet"></div>
+      <p class="sous">Das Licht fällt durch die Glastür und legt farbige Flecken aufs Bett. Eine Stunde lang, dann ist es vorbei. Das Zimmer für Frühaufsteher.</p>
+    </div>
+    <div class="mosaique mosaique--2">
+      <div class="ph"><img data-photo="bleue-lit" alt="Das Doppelbett des blauen Zimmers"></div>
+      <div class="ph"><img data-photo="bleue-vitrail" alt="Die Buntglastür des blauen Zimmers"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 21 · CHAMBRE VERTE -->
+<section class="dia" data-duree="9000">
+  <div class="g-fiche g-fiche--pale">
+    <div class="txt">
+      <p class="eyebrow">Grünes Zimmer · Doppel</p>
+      <h2 class="titre">Das ruhigste der vier.</h2>
+      <div class="filet"></div>
+      <p class="sous">Etwas abseits vom Durchgang, schlicht, ohne etwas, das den Blick festhält. Zwei Buntglaslampen links und rechts vom Bett, mehr nicht. Man schläft gut hier.</p>
+    </div>
+    <div class="mosaique mosaique--1">
+      <div class="ph"><img data-photo="verte-lit" alt="Das Doppelbett des grünen Zimmers"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 22 · CHAMBRE SIMPLE -->
+<section class="dia" data-duree="9000">
+  <div class="g-fiche">
+    <div class="txt">
+      <p class="eyebrow">Einzelzimmer</p>
+      <h2 class="titre">Ein richtiges Zimmer, kein Zustellbett.</h2>
+      <div class="filet"></div>
+      <p class="sous">Es hat sein eigenes Bad wie die anderen drei. Niemand schläft im Wohnzimmer, und der siebte Gast ist nicht der Benachteiligte im Haus.</p>
+    </div>
+    <div class="mosaique mosaique--1">
+      <div class="ph"><img data-photo="single-lit" alt="Das Einzelbett des vierten Zimmers"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 23 · SALON -->
+<section class="dia" data-duree="10000">
+  <div class="g-fiche g-fiche--pale">
+    <div class="txt">
+      <p class="eyebrow">Das Wohnzimmer</p>
+      <h2 class="titre">Für die Abende, an denen der Wind auffrischt.</h2>
+      <div class="filet"></div>
+      <p class="sous">Asilah liegt am Atlantik: An manchen Abenden ist die Terrasse nicht mehr auszuhalten. Dann kommt man hierher zurück, legt einen Film ein, und das ganze Haus versammelt sich auf der Bank. Die Bilder an den Wänden stammen von Künstlern aus der Stadt.</p>
+      <ul class="details">
+        <li>Smart-TV 55″ — IPTV und Netflix</li>
+        <li>Bose-Soundanlage</li>
+      </ul>
+    </div>
+    <div class="mosaique mosaique--2">
+      <div class="ph"><img data-photo="salon-ensemble" alt="Das Wohnzimmer in der Länge, Eckbank und gerahmte Bilder"></div>
+      <div class="ph"><img data-photo="salon-tv" alt="Die Fernsehecke des Wohnzimmers"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 24 · CUISINE -->
+<section class="dia" data-duree="9000">
+  <div class="g-fiche">
+    <div class="txt">
+      <p class="eyebrow">Küche &amp; Esszimmer</p>
+      <h2 class="titre">Zum Abendessen muss man nicht ausgehen.</h2>
+      <div class="filet"></div>
+      <p class="sous">Am späten Vormittag laufen die Boote in den Hafen ein; dort sucht man den Fisch aus und kocht ihn abends hier. Genau darin liegt der Unterschied zwischen einem gemieteten Haus und gebuchten Zimmern.</p>
+      <ul class="details">
+        <li>Voll ausgestattete Küche</li>
+        <li>Angrenzendes Esszimmer</li>
+        <li>Waschmaschine</li>
+      </ul>
+    </div>
+    <div class="mosaique mosaique--1">
+      <div class="ph"><img data-photo="cuisine" alt="Die Küche und das Esszimmer"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 25 · TERRASSE -->
+<section class="dia" data-duree="11000">
+  <div class="g-fiche g-fiche--pale">
+    <div class="txt">
+      <p class="eyebrow">Die Dachterrasse</p>
+      <h2 class="titre">Am Ende landen alle auf dem Dach.</h2>
+      <div class="filet"></div>
+      <p class="sous">Groß genug, dass drei Menschen drei verschiedene Dinge tun können, ohne sich in die Quere zu kommen. Die überdachte Ecke liegt nachmittags im Schatten, wird bei Einbruch der Dunkelheit beleuchtet und bleibt nutzbar, wenn der Westwind auffrischt.</p>
+    </div>
+    <div class="mosaique mosaique--3">
+      <div class="ph"><img data-photo="terrasse-couvert" alt="Die überdachte Sitzecke der Terrasse in der Dämmerung"></div>
+      <div class="ph"><img data-photo="terrasse-nuit" alt="Die Terrasse und ihr Mosaikpaneel bei Nacht"></div>
+      <div class="ph"><img data-photo="terrasse-fauteuil" alt="Der Hängesessel auf der Terrasse"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 26 · TERRASSE, LES MOMENTS -->
+<section class="dia" data-duree="10000">
+  <div class="g-fiche">
+    <div class="txt">
+      <p class="eyebrow">Die Dachterrasse</p>
+      <h2 class="titre">Der Tag beginnt und endet hier.</h2>
+      <div class="filet"></div>
+      <p class="sous">Morgens Eier in der Sonne, Zitronen einen Meter neben dem Tisch gepflückt, und das Tablett, das man hinaufträgt, wenn das Licht über die Dächer wandert. Neun Monate im Jahr ist das hier das eigentliche Wohnzimmer des Hauses.</p>
+    </div>
+    <div class="mosaique mosaique--3">
+      <div class="ph"><img data-photo="terrasse-table" alt="Der Frühstückstisch auf der Terrasse"></div>
+      <div class="ph"><img data-photo="terrasse-apero" alt="Das Aperitif-Tablett auf der Terrasse"></div>
+      <div class="ph"><img data-photo="terrasse-citronnier" alt="Die Zitronen auf der Terrasse"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 27 -->
+<section class="dia g-photo" data-duree="6500">
+  <div class="fond"><img data-photo="terrasse-couvert" alt="Die Sitzecke der Terrasse in der Dämmerung"></div>
+  <div class="voile voile--bas"></div>
+  <div class="dedans clair" style="justify-content:flex-end">
+    <h2 class="titre">Das ist die Stunde, in der niemand mehr vorschlägt auszugehen.</h2>
+  </div>
+</section>
+
+<!-- 28 · ÉQUIPEMENTS -->
+<section class="dia" data-duree="14000">
+  <div class="dedans" style="background:var(--ombre)">
+    <div class="cadre">
+      <p class="eyebrow">Was das Haus bietet</p>
+      <h2 class="titre">Das Haus ist bezugsfertig.</h2>
+      <ul class="liste">
+        <li>Innenhof mit Brunnen</li>
+        <li>4 Schlafzimmer mit Bettwäsche</li>
+        <li>4 Bäder mit Handtüchern</li>
+        <li>Heizung in allen Bädern</li>
+        <li>Wohnzimmer mit Smart-TV 55″, IPTV und Netflix</li>
+        <li>Esszimmer</li>
+        <li>Bose-Soundanlage</li>
+        <li>Sehr große Dachterrasse mit Sitzecke, Tisch und Sonnenschirm</li>
+        <li>Voll ausgestattete Küche</li>
+        <li>Waschmaschine</li>
+        <li>WLAN über Glasfaser</li>
+        <li>Flughafentransfer — 40 € pro Fahrt</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 29 -->
+<section class="dia g-photo" data-duree="6500">
+  <div class="fond"><img data-photo="ville-coucher" alt="Sonnenuntergang am Strand von Asilah"></div>
+  <div class="voile voile--bas"></div>
+  <div class="dedans clair" style="justify-content:flex-end">
+    <h2 class="titre">Die Sonne geht im Atlantik unter, fünf Minuten von der Haustür entfernt.</h2>
+  </div>
+</section>
+
+<!-- 30 · CONTACT -->
+<section class="dia" data-duree="14000">
+  <div class="fond"><img data-photo="entree-plaque" alt="Das Zellige-Schild des Riad Le Bougainvillier"></div>
+  <div class="voile voile--gauche"></div>
+  <div class="dedans clair" style="justify-content:center">
+    <p class="eyebrow">Aufenthalt</p>
+    <h2 class="titre titre--geant">Riad Le Bougainvillier</h2>
+    <div class="filet"></div>
+    <div class="contact">
+      <div><span class="cle">Adresse</span><span class="val">20 Rue Jamaa Bin Ayad — Altstadt, Asilah</span></div>
+      <div><span class="cle">Telefon &amp; WhatsApp</span><span class="val">+212 679 32 32 32</span></div>
+      <div><span class="cle">Flughafentransfer</span><span class="val">40 € pro Fahrt, auf Anfrage</span></div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<div id="barre"></div>
+<div id="compteur">01 / 30</div>
+<nav id="sommaire" aria-label="Zur Folie springen"></nav>
+
+<div id="pilote">
+  <button id="prec" aria-label="Vorherige Folie"><svg viewBox="0 0 24 24"><path d="M15.4 4.6 8 12l7.4 7.4 1.6-1.6-5.8-5.8 5.8-5.8z"/></svg></button>
+  <button id="pause" aria-label="Pause">
+    <svg id="icoPause" viewBox="0 0 24 24"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg>
+    <svg id="icoLecture" viewBox="0 0 24 24" style="display:none"><path d="M7 4.5 19 12 7 19.5z"/></svg>
+  </button>
+  <button id="suiv" aria-label="Nächste Folie"><svg viewBox="0 0 24 24"><path d="M8.6 4.6 16 12l-7.4 7.4L7 17.8l5.8-5.8L7 6.2z"/></svg></button>
+  <button id="langue" aria-label="Deutsch">DE</button>
+  <button id="plein" aria-label="Vollbild"><svg viewBox="0 0 24 24"><path d="M4 9V4h5v2H6v3zm11-5h5v5h-2V6h-3zM4 15h2v3h3v2H4zm14 0h2v5h-5v-2h3z"/></svg></button>
+</div>
+
+<script>
+const DOSSIER = "photos/";
+
+(function(){
+  "use strict";
+  const dias = Array.prototype.slice.call(document.querySelectorAll(".dia"));
+  const barre = document.getElementById("barre");
+  const compteur = document.getElementById("compteur");
+  const sommaire = document.getElementById("sommaire");
+  const btnPause = document.getElementById("pause");
+  const icoPause = document.getElementById("icoPause");
+  const icoLect = document.getElementById("icoLecture");
+  const doux = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function cadreVide(libelle){
+    const w=1200,h=900;
+    const svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'">'+
+      '<rect width="100%" height="100%" fill="#EFF3EF"/><g fill="none" stroke="#B2C6B9" stroke-width="2">'+
+      '<rect x="'+(w/2-60)+'" y="'+(h/2-76)+'" width="120" height="92" rx="4"/>'+
+      '<circle cx="'+(w/2-28)+'" cy="'+(h/2-50)+'" r="10"/>'+
+      '<path d="M'+(w/2-57)+' '+(h/2+13)+' l38-38 28 28 21-18 28 28"/></g>'+
+      '<text x="50%" y="'+(h/2+62)+'" text-anchor="middle" font-family="Jost,Helvetica,Arial,sans-serif" '+
+      'font-size="26" letter-spacing="3" fill="#8DA396">'+libelle+'</text></svg>';
+    return "data:image/svg+xml;utf8,"+encodeURIComponent(svg);
+  }
+
+  function preparer(i){
+    const d = dias[(i + dias.length) % dias.length];
+    if(!d || d.dataset.pretes) return;
+    d.dataset.pretes = "1";
+    d.querySelectorAll("[data-photo]").forEach(function(img){
+      img.addEventListener("error", function(){
+        if(img.dataset.remplace) return;
+        img.dataset.remplace = "1";
+        img.src = cadreVide("FOTO FOLGT");
+      });
+      img.src = DOSSIER + img.dataset.photo + ".webp";
+    });
+  }
+
+  dias.forEach(function(d,i){
+    const b=document.createElement("button");
+    b.type="button"; b.setAttribute("aria-label","Folie "+(i+1));
+    b.setAttribute("aria-current", i===0?"true":"false");
+    b.addEventListener("click", function(){ aller(i); });
+    sommaire.appendChild(b);
+  });
+  const points = Array.prototype.slice.call(sommaire.children);
+
+  let index=0, enPause=false, debut=0, restant=0, minuteur=null, anim=null;
+  const duree = (i) => parseInt(dias[i].dataset.duree||"7000",10);
+
+  function peindre(){
+    dias.forEach(function(d,i){ d.classList.toggle("actif", i===index); });
+    dias[index].style.setProperty("--duree", duree(index)+"ms");
+    points.forEach(function(p,i){ p.setAttribute("aria-current", String(i===index)); });
+    compteur.textContent = String(index+1).padStart(2,"0")+" / "+String(dias.length).padStart(2,"0");
+  }
+  function boucle(){
+    cancelAnimationFrame(anim);
+    (function pas(){
+      if(enPause) return;
+      const p = Math.min(1,(performance.now()-debut)/duree(index));
+      barre.style.width=(p*100)+"%";
+      if(p<1) anim=requestAnimationFrame(pas);
+    })();
+  }
+  function lancer(){
+    clearTimeout(minuteur);
+    debut=performance.now(); restant=duree(index);
+    barre.style.width="0%"; boucle();
+    minuteur=setTimeout(suivante, restant);
+  }
+  function aller(i){
+    index=(i+dias.length)%dias.length;
+    preparer(index); preparer(index+1);
+    peindre();
+    if(!enPause) lancer();
+    else { clearTimeout(minuteur); barre.style.width="0%"; restant=duree(index); }
+  }
+  function suivante(){ aller(index+1); }
+  function precedente(){ aller(index-1); }
+  function basculerPause(){
+    enPause=!enPause;
+    icoPause.style.display=enPause?"none":"";
+    icoLect.style.display=enPause?"":"none";
+    btnPause.setAttribute("aria-label", enPause?"Fortsetzen":"Pause");
+    if(enPause){
+      clearTimeout(minuteur); cancelAnimationFrame(anim);
+      restant=Math.max(0,restant-(performance.now()-debut));
+    } else { debut=performance.now(); boucle(); minuteur=setTimeout(suivante,restant); }
+  }
+
+  document.getElementById("suiv").addEventListener("click", suivante);
+  document.getElementById("prec").addEventListener("click", precedente);
+  btnPause.addEventListener("click", basculerPause);
+  document.getElementById("langue").addEventListener("click", function(){ location.href="index.html"; });
+  document.getElementById("plein").addEventListener("click", function(){
+    if(document.fullscreenElement) document.exitFullscreen();
+    else if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
+  });
+  document.addEventListener("keydown", function(e){
+    if(e.key==="ArrowRight"||e.key==="PageDown"){ e.preventDefault(); suivante(); }
+    else if(e.key==="ArrowLeft"||e.key==="PageUp"){ e.preventDefault(); precedente(); }
+    else if(e.key===" "){ e.preventDefault(); basculerPause(); }
+    else if(e.key.toLowerCase()==="f"){
+      if(document.documentElement.requestFullscreen && !document.fullscreenElement)
+        document.documentElement.requestFullscreen();
+    }
+  });
+  let x0=null,y0=null;
+  document.addEventListener("touchstart", function(e){ x0=e.touches[0].clientX; y0=e.touches[0].clientY; }, {passive:true});
+  document.addEventListener("touchend", function(e){
+    if(x0===null) return;
+    const dx=e.changedTouches[0].clientX-x0, dy=e.changedTouches[0].clientY-y0;
+    if(Math.abs(dx)>55 && Math.abs(dx)>Math.abs(dy)){ dx<0?suivante():precedente(); }
+    x0=y0=null;
+  }, {passive:true});
+  let tempo=null;
+  function reveler(){
+    document.body.classList.add("bouge");
+    clearTimeout(tempo);
+    tempo=setTimeout(function(){ document.body.classList.remove("bouge"); },2200);
+  }
+  document.addEventListener("mousemove", reveler, {passive:true});
+  document.addEventListener("touchstart", reveler, {passive:true});
+  document.addEventListener("visibilitychange", function(){ if(document.hidden && !enPause) basculerPause(); });
+
+  preparer(0); preparer(1); preparer(2);
+  window.addEventListener("load", function(){
+    let k = 3;
+    (function suite(){
+      if(k >= dias.length) return;
+      preparer(k++);
+      setTimeout(suite, 220);
+    })();
+  });
+
+  peindre();
+  if(doux) barre.style.display="none";
+  lancer(); reveler();
+})();
+</script>
+</body>
+</html>

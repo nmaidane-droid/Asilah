@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Riad Le Bougainvillier — Asilah</title>
+<meta name="description" content="Riad de quatre chambres loué en entier dans l'ancienne médina d'Asilah, Maroc.">
+<meta name="theme-color" content="#FFFFFF">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23fff'/%3E%3Cpath d='M16 5c5 0 9 4 9 9v13H7V14c0-5 4-9 9-9z' fill='%232F7A55'/%3E%3Ccircle cx='16' cy='17' r='3' fill='%23C42B6B'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Jost:wght@300;400;500&family=Noto+Sans+SC:wght@400&family=Noto+Sans+JP:wght@400&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box}
+  html,body{height:100%;margin:0}
+  body{
+    display:grid; place-items:center; padding:clamp(24px,6vw,56px);
+    background:#FFFFFF; color:#14342A; text-align:center;
+    font-family:"Jost","Helvetica Neue",Arial,sans-serif; font-weight:300;
+    -webkit-font-smoothing:antialiased; -webkit-tap-highlight-color:transparent;
+  }
+  /* La cour en filigrane. Deux réglages :
+     — opacity ci-dessous : intensité générale de la photo
+     — le dégradé blanc : lavé au centre pour le texte, plus clair sur les bords */
+  body::before{
+    content:""; position:fixed; inset:0; z-index:0;
+    background:url("photos/cour-ciel.webp") center/cover no-repeat;
+    opacity:1;
+  }
+  body::after{
+    content:""; position:fixed; inset:0; z-index:0;
+    background:radial-gradient(ellipse 68% 54% at center,
+      rgba(255,255,255,.93) 0%,
+      rgba(255,255,255,.84) 34%,
+      rgba(255,255,255,.46) 68%,
+      rgba(255,255,255,.14) 100%);
+  }
+  main{position:relative; z-index:1; max-width:660px; width:100%}
+  .eyebrow{
+    font-size:.68rem; letter-spacing:.3em; text-transform:uppercase;
+    color:#8DA396; margin:0 0 14px;
+  }
+  h1{
+    font-family:"Marcellus",Georgia,serif; font-weight:400;
+    font-size:clamp(1.7rem,5.4vw,2.9rem); line-height:1.15; margin:0;
+    letter-spacing:-.005em;
+  }
+  .filet{width:52px;height:2px;background:#C42B6B;margin:clamp(22px,3vw,32px) auto}
+  .invite{
+    font-size:.66rem; letter-spacing:.26em; text-transform:uppercase;
+    color:#8DA396; margin:0 0 clamp(18px,2.5vw,26px);
+  }
+  .langues{display:grid; gap:10px; grid-template-columns:repeat(auto-fit,minmax(152px,1fr))}
+  a{
+    display:block; padding:1em .8em;
+    border:1px solid #C3D2C8; border-radius:2px; background:rgba(255,255,255,.82);
+    color:#14342A; text-decoration:none; font-size:.92rem; letter-spacing:.04em;
+    transition:background 260ms ease, border-color 260ms ease, color 260ms ease;
+  }
+  a:hover, a:focus-visible{background:#14342A; border-color:#14342A; color:#fff}
+  a:focus-visible{outline:2px solid #C42B6B; outline-offset:3px}
+  .zh{font-family:"Noto Sans SC","Jost",sans-serif}
+  .ja{font-family:"Noto Sans JP","Jost",sans-serif}
+  @media (prefers-reduced-motion:reduce){ a{transition:none} }
+</style>
+</head>
+<body>
+  <main>
+    <p class="eyebrow">Asilah · Maroc</p>
+    <h1>Riad Le Bougainvillier</h1>
+    <div class="filet"></div>
+    <p class="invite">Choisissez une langue · Choose a language</p>
+    <nav class="langues">
+      <a href="fr.html" hreflang="fr">Français</a>
+      <a href="en.html" hreflang="en">English</a>
+      <a href="es.html" hreflang="es">Español</a>
+      <a href="de.html" hreflang="de">Deutsch</a>
+      <a href="nl.html" hreflang="nl">Nederlands</a>
+      <a href="zh.html" hreflang="zh" class="zh">中文</a>
+      <a href="ja.html" hreflang="ja" class="ja">日本語</a>
+    </nav>
+  </main>
+</body>
+</html>
