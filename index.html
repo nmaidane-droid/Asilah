@@ -57,6 +57,10 @@
     background:rgba(255,255,255,.62); backdrop-filter:blur(7px);
     border:1px solid rgba(255,255,255,.72); border-radius:2px;
     color:#000000; text-decoration:none; font-size:.92rem; letter-spacing:.04em;
+    /* graisse imposée : sans elle, les langues latines héritent du 300 du corps
+       alors que les polices hébraïque et CJK n'existent qu'en 400 — d'où
+       une impression de gris d'un côté et de noir de l'autre */
+    font-weight:400;
     transition:background 260ms ease, border-color 260ms ease, color 260ms ease;
   }
   a:hover, a:focus-visible{
